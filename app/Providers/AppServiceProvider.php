@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Providers;
+
+use App\Exceptions\BaseException;
+use App\Interfaces\MediaStorageInterface;
+use App\Interfaces\PaymentGatewayInterface;
+use App\Interfaces\PushNotificationInterface;
+use App\Services\Media\Adapters\LocalMediaAdapter;
+use App\Services\Notification\Adapters\NullNotificationAdapter;
+use App\Services\Payment\Adapters\NullPaymentAdapter;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     * Bind interfaces to their concrete adapters based on config.
+     */
+    public function register(): void
+    {
+        $this->bindPaymentGateway();
+        $this->bindMediaStorage();
+        $this->bindPushNotification();
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+
+    private function bindPaymentGateway(): void
+    {
+        $gateway = config('payment.default', 'null_adapter');
+
+        $this->app->bind(PaymentGatewayInterface::class, match ($gateway) {
+            'paymob' => \App\Services\Payment\Adapters\PaymobAdapter::class,
+            default  => NullPaymentAdapter::class,
+        });
+    }
+
+    private function bindMediaStorage(): void
+    {
+        $provider = config('media.default', 'local');
+
+        $this->app->bind(MediaStorageInterface::class, match ($provider) {
+            'cloudinary' => \App\Services\Media\Adapters\CloudinaryAdapter::class,
+            default      => LocalMediaAdapter::class,
+        });
+    }
+
+    private function bindPushNotification(): void
+    {
+        $provider = config('notification.default', 'null');
+
+        $this->app->bind(PushNotificationInterface::class, match ($provider) {
+            'expo' => \App\Services\Notification\Adapters\ExpoAdapter::class,
+            default => NullNotificationAdapter::class,
+        });
+    }
+}
