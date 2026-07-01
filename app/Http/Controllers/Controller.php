@@ -6,9 +6,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 abstract class Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Return a successful JSON response.
      *
@@ -77,10 +80,14 @@ abstract class Controller
             'message' => 'OK',
             'data'    => $resourceClass::collection($paginator),
             'meta'    => [
-                'current_page' => $paginator->currentPage(),
-                'per_page'     => $paginator->perPage(),
-                'total'        => $paginator->total(),
-                'last_page'    => $paginator->lastPage(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page'     => $paginator->perPage(),
+                    'total'        => $paginator->total(),
+                    'last_page'    => $paginator->lastPage(),
+                    'count'        => $paginator->count(),
+                    'total_pages'  => $paginator->lastPage(),
+                ]
             ],
             'errors'  => null,
         ]);

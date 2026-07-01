@@ -40,9 +40,9 @@ class Listing extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function amenities(): BelongsToMany
+    public function amenities(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(Amenity::class);
+        return $this->belongsToMany(Amenity::class, 'listing_amenity');
     }
 
     public function media(): MorphMany

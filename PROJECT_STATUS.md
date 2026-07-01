@@ -13,7 +13,7 @@
 
 ## Current Phase
 
-> **Phase 3 — Authentication**
+> **Phase 5 — Availability & Booking**
 > Status: 🟡 In Progress
 
 ---
@@ -45,9 +45,9 @@
 | 0 | Foundation & Project Setup | 🟢 Complete | July 1, 2026 |
 | 1 | Database Migrations | 🟢 Complete | July 1, 2026 |
 | 2 | Models & Relationships | 🟢 Complete | July 1, 2026 |
-| 3 | Authentication | 🟡 In Progress | — |
-| 4 | Listings Management | 🔴 Not Started | — |
-| 5 | Availability & Booking | 🔴 Not Started | — |
+| 3 | Authentication | 🟢 Complete | July 1, 2026 |
+| 4 | Listings Management | 🟢 Complete | July 1, 2026 |
+| 5 | Availability & Booking | 🟡 In Progress | — |
 | 6 | Payment Integration | 🔴 Not Started | — |
 | 7 | Media Uploads | 🔴 Not Started | — |
 | 8 | Reviews | 🔴 Not Started | — |
@@ -82,23 +82,20 @@
 
 ---
 
-## What's In Progress (Phase 3)
+## What's In Progress (Phase 5)
 
-### Phase 3 Exit Criteria:
-- [ ] All auth endpoints return unified API response format
-- [ ] `password` never appears in any API response
-- [ ] Admin role cannot be self-registered (returns 422)
-- [ ] Token is revoked after logout (subsequent requests return 401)
-- [ ] `last_login_at` updated on every successful login
-- [ ] Email verification email sent on register (use `Mail::fake()` in tests)
+### Phase 5 Exit Criteria:
+- [ ] Availability blocks correctly created/removed on booking
+- [ ] Concurrent booking attempts handled safely (DB transactions / row locks)
+- [ ] Booking cost logic matches base rate + fees precisely
+- [ ] Customers can view their own bookings
+- [ ] Providers can view bookings for their listings
 - [ ] All feature tests pass
 
 ---
 
 ## What's Left
 
-- [ ] **Phase 3:** Full auth system (register, login, logout, social auth stubs, email verification)
-- [ ] **Phase 4:** Listings CRUD + approval workflow + search
 - [ ] **Phase 5:** Availability engine + booking flow (conflict-safe, transactional)
 - [ ] **Phase 6:** Payment processing through `PaymentGatewayInterface` + webhooks
 - [ ] **Phase 7:** Media uploads through `MediaStorageInterface` (Cloudinary)

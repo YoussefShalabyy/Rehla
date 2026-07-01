@@ -14,8 +14,8 @@ class Amenity extends Model
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
-    public function listings(): BelongsToMany
+    public function listings(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(Listing::class);
+        return $this->belongsToMany(Listing::class, 'listing_amenity');
     }
 }
