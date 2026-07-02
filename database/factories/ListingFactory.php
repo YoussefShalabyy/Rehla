@@ -3,38 +3,68 @@
 namespace Database\Factories;
 
 use App\Models\Listing;
+use App\Models\User;
+use App\Enums\UserRole;
+use App\Enums\ListingType;
+use App\Enums\ListingStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-/**
- * @extends Factory<Listing>
- */
 class ListingFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Listing::class;
+
     public function definition(): array
     {
         return [
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'owner_id' => \App\Models\User::factory(),
-            'type' => \App\Enums\ListingType::Property,
-            'property_type' => \App\Enums\PropertyType::Apartment,
-            'title' => fake()->sentence(3),
-            'description' => fake()->paragraph(),
-            'address' => fake()->streetAddress(),
-            'country' => 'Egypt',
-            'city' => 'Cairo',
-            'latitude' => fake()->latitude(),
-            'longitude' => fake()->longitude(),
-            'base_price_cents' => fake()->numberBetween(10000, 100000), // 100 - 1000 EGP
-            'cleaning_fee_cents' => 5000, // 50 EGP
-            'extra_guest_fee_cents' => 2000, // 20 EGP
-            'max_guests' => fake()->numberBetween(1, 10),
-            'status' => \App\Enums\ListingStatus::Pending,
+            'uuid'          => (string) Str::uuid(),
+            'owner_id'      => User::factory()->create(['role' => UserRole::Provider])->id,
+            'title'         => $this->faker->sentence(3),
+            'description'   => $this->faker->paragraph(),
+            'type'          => $this->faker->randomElement([ListingType::Property, ListingType::Car]),
+            'property_type' => fn(array $attributes) => $attributes['type'] === ListingType::Property ? 'apartment' : null,
+            'address'       => $this->faker->streetAddress(),
+            'country'       => 'Egypt',
+            'city'          => 'Cairo',
+            'latitude'      => $this->faker->latitude(),
+            'longitude'     => $this->faker->longitude(),
+            'base_price_cents' => $this->faker->numberBetween(10000, 100000), // 100 - 1000 EGP
+            'cleaning_fee_cents' => 5000,
+            'extra_guest_fee_cents' => 2000,
+            'max_guests'    => $this->faker->numberBetween(1, 10),
+            'status'        => ListingStatus::Pending,
             'is_instant_bookable' => false,
         ];
+    }
+
+    public function property(): static
+    {
+        return $this->state([
+            'type'          => ListingType::Property,
+            'property_type' => 'apartment',
+        ]);
+    }
+
+    public function car(): static
+    {
+        return $this->state([
+            'type'          => ListingType::Car,
+            'property_type' => null,
+        ]);
+    }
+
+    public function published(): static
+    {
+        return $this->state(['status' => ListingStatus::Published]);
+    }
+
+    public function pending(): static
+    {
+        return $this->state(['status' => ListingStatus::Pending]);
+    }
+
+    public function rejected(): static
+    {
+        return $this->state(['status' => ListingStatus::Rejected]);
     }
 }

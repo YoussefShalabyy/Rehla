@@ -97,7 +97,7 @@
 ## What's Left
 
 - [x] **Phase 10: Admin & Owner Dashboard APIs**
-- [ ] **Phase 11: Seeders, Factories & Demo Data**
+- [x] **Phase 11: Seeders, Factories & Demo Data**
 - [ ] **Phase 12: Security hardening, rate limiting, final test suite**
 
 ---

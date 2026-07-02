@@ -2,8 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Booking;
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -14,12 +15,27 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => Str::uuid()->toString(),
-            'booking_id' => Booking::factory(),
-            'gateway' => 'paymob',
-            'amount_cents' => rand(1000, 5000) * 100,
-            'status' => 'pending',
-            'gateway_transaction_id' => (string) rand(100000, 999999),
+            'uuid'           => (string) Str::uuid(),
+            'booking_id'     => Booking::factory(),
+            'amount_cents'   => $this->faker->numberBetween(50000, 500000),
+            'status'                 => PaymentStatus::Pending,
+            'gateway_transaction_id' => $this->faker->uuid(),
+            'gateway'                => 'paymob',
         ];
+    }
+
+    public function succeeded(): static
+    {
+        return $this->state(['status' => PaymentStatus::Succeeded]);
+    }
+
+    public function failed(): static
+    {
+        return $this->state(['status' => PaymentStatus::Failed]);
+    }
+
+    public function refunded(): static
+    {
+        return $this->state(['status' => PaymentStatus::Refunded]);
     }
 }

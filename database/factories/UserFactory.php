@@ -44,4 +44,24 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function customer(): static
+    {
+        return $this->state(['role' => \App\Enums\UserRole::Customer]);
+    }
+
+    public function provider(): static
+    {
+        return $this->state(['role' => \App\Enums\UserRole::Provider]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(['role' => \App\Enums\UserRole::Admin]);
+    }
+
+    public function suspended(): static
+    {
+        return $this->state(['status' => \App\Enums\UserStatus::Suspended]);
+    }
 }

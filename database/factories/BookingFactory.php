@@ -3,11 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Booking;
-use App\Models\Listing;
 use App\Models\User;
+use App\Models\Listing;
+use App\Enums\UserRole;
+use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class BookingFactory extends Factory
 {
@@ -15,20 +16,35 @@ class BookingFactory extends Factory
 
     public function definition(): array
     {
-        $checkIn = Carbon::today()->addDays(rand(1, 10));
-        $checkOut = $checkIn->copy()->addDays(rand(1, 5));
+        $checkIn = $this->faker->dateTimeBetween('+1 days', '+30 days')->format('Y-m-d');
+        $checkOut = $this->faker->dateTimeBetween('+31 days', '+60 days')->format('Y-m-d');
 
         return [
-            'listing_id' => Listing::factory(),
-            'customer_id' => User::factory(),
-            'check_in_date' => $checkIn->format('Y-m-d'),
-            'check_out_date' => $checkOut->format('Y-m-d'),
-            'guests_count' => rand(1, 4),
-            'currency' => 'EGP',
-            'total_amount_cents' => rand(1000, 5000) * 100,
-            'platform_fee_cents' => rand(100, 500) * 100,
-            'status' => 'pending',
-            'payment_status' => 'pending',
+            'uuid'               => (string) Str::uuid(),
+            'booking_reference'  => strtoupper(Str::random(8)),
+            'customer_id'        => User::factory()->create(['role' => UserRole::Customer])->id,
+            'listing_id'         => Listing::factory()->published(),
+            'check_in_date'      => $checkIn,
+            'check_out_date'     => $checkOut,
+            'total_amount_cents' => $this->faker->numberBetween(50000, 500000), // 500 to 5000 EGP
+            'platform_fee_cents' => 5000,
+            'status'             => BookingStatus::Pending,
+            'guests_count'       => 2,
         ];
+    }
+
+    public function confirmed(): static
+    {
+        return $this->state(['status' => BookingStatus::Confirmed]);
+    }
+
+    public function completed(): static
+    {
+        return $this->state(['status' => BookingStatus::Completed]);
+    }
+
+    public function cancelled(): static
+    {
+        return $this->state(['status' => BookingStatus::Cancelled]);
     }
 }

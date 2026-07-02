@@ -15,6 +15,7 @@ it('auto-generates uuid and booking_reference on create', function () {
     $listing = Listing::create([
         'uuid' => (string) str()->uuid(),
         'owner_id' => $owner->id,
+        'type' => \App\Enums\ListingType::Property,
         'title' => 'Test Listing',
         'description' => 'Test',
         'address' => 'Test',
