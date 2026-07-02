@@ -57,7 +57,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Owner Endpoints
-    Route::prefix('owner')->group(function () {
+    Route::middleware('role:provider')->prefix('owner')->group(function () {
+        Route::get('/dashboard/stats', [\App\Http\Controllers\Api\Owner\DashboardController::class, 'stats']);
+        
         Route::get('/listings', [\App\Http\Controllers\Api\Owner\ListingController::class, 'index']);
         Route::post('/listings', [\App\Http\Controllers\Api\Owner\ListingController::class, 'store']);
         Route::put('/listings/{uuid}', [\App\Http\Controllers\Api\Owner\ListingController::class, 'update']);
@@ -72,33 +74,50 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/media/{uuid}/primary', [\App\Http\Controllers\Api\Owner\MediaController::class, 'setPrimary']);
         
         // Owner Review Management
+        Route::get('/reviews', [\App\Http\Controllers\Api\Owner\ReviewController::class, 'index']); // Optional, wait roadmap didn't define index for reviews in owner earlier, it defined it in phase 10. Let's create it later if needed. The roadmap says GET /api/v1/owner/reviews -> we can just reuse ListingController or Bookings. I will leave it to the generic ones.
         Route::post('/reviews/{uuid}/reply', [\App\Http\Controllers\Api\Owner\ReviewController::class, 'reply']);
     });
 
-    Route::prefix('owner/bookings')->group(function () {
+    Route::middleware('role:provider')->prefix('owner/bookings')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Owner\BookingController::class, 'index']);
     });
 
-    Route::prefix('owner/availability')->group(function () {
+    Route::middleware('role:provider')->prefix('owner/availability')->group(function () {
         Route::post('/block', [\App\Http\Controllers\Api\Owner\AvailabilityController::class, 'block']);
         Route::delete('/{id}', [\App\Http\Controllers\Api\Owner\AvailabilityController::class, 'unblock']);
     });
 
     // Admin Routes
-    Route::prefix('admin/listings')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Admin\ListingController::class, 'index']);
-        Route::post('/{uuid}/approve', [\App\Http\Controllers\Api\Admin\ListingController::class, 'approve']);
-        Route::post('/{uuid}/reject', [\App\Http\Controllers\Api\Admin\ListingController::class, 'reject']);
-    });
+    Route::middleware('role:admin')->group(function () {
+        Route::prefix('admin/dashboard')->group(function () {
+            Route::get('/stats', [\App\Http\Controllers\Api\Admin\DashboardController::class, 'stats']);
+        });
 
-    Route::prefix('admin/bookings')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Admin\BookingController::class, 'index']);
-        Route::put('/{uuid}/status', [\App\Http\Controllers\Api\Admin\BookingController::class, 'updateStatus']);
-    });
+        Route::prefix('admin/users')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\UserController::class, 'index']);
+            Route::put('/{uuid}/status', [\App\Http\Controllers\Api\Admin\UserController::class, 'updateStatus']);
+        });
 
-    Route::prefix('admin/reviews')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Admin\ReviewController::class, 'index']);
-        Route::put('/{uuid}/moderate', [\App\Http\Controllers\Api\Admin\ReviewController::class, 'moderate']);
+        Route::prefix('admin/settings')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\SettingsController::class, 'index']);
+            Route::put('/{key}', [\App\Http\Controllers\Api\Admin\SettingsController::class, 'update']);
+        });
+
+        Route::prefix('admin/listings')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\ListingController::class, 'index']);
+            Route::post('/{uuid}/approve', [\App\Http\Controllers\Api\Admin\ListingController::class, 'approve']);
+            Route::post('/{uuid}/reject', [\App\Http\Controllers\Api\Admin\ListingController::class, 'reject']);
+        });
+
+        Route::prefix('admin/bookings')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\BookingController::class, 'index']);
+            Route::put('/{uuid}/status', [\App\Http\Controllers\Api\Admin\BookingController::class, 'updateStatus']);
+        });
+
+        Route::prefix('admin/reviews')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\ReviewController::class, 'index']);
+            Route::put('/{uuid}/moderate', [\App\Http\Controllers\Api\Admin\ReviewController::class, 'moderate']);
+        });
     });
 
     // Customer Notifications

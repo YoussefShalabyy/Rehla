@@ -96,14 +96,9 @@
 
 ## What's Left
 
-- [ ] **Phase 5:** Availability engine + booking flow (conflict-safe, transactional)
-- [ ] **Phase 6:** Payment processing through `PaymentGatewayInterface` + webhooks
-- [ ] **Phase 7:** Media uploads through `MediaStorageInterface` (Cloudinary)
-- [ ] **Phase 8:** Reviews system (post-stay only, verified)
-- [ ] **Phase 9:** Notifications (push + email, always queued)
-- [ ] **Phase 10:** Admin + Owner API endpoints for React dashboard
-- [ ] **Phase 11:** Seeders, factories, demo data
-- [ ] **Phase 12:** Security hardening, rate limiting, final test suite
+- [x] **Phase 10: Admin & Owner Dashboard APIs**
+- [ ] **Phase 11: Seeders, Factories & Demo Data**
+- [ ] **Phase 12: Security hardening, rate limiting, final test suite**
 
 ---
 

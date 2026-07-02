@@ -16,6 +16,21 @@ class ReviewController extends Controller
 {
     public function __construct(private ReviewService $reviewService) {}
 
+    public function index(Request $request): JsonResponse
+    {
+        $reviews = \App\Models\Review::whereHas('listing', function ($query) use ($request) {
+            $query->where('owner_id', $request->user()->id);
+        })->with(['customer', 'listing'])->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reviews retrieved successfully.',
+            'data'    => \App\Http\Resources\Review\ReviewResource::collection($reviews)->response()->getData(true)['data'],
+            'meta'    => \App\Http\Resources\Review\ReviewResource::collection($reviews)->response()->getData(true)['meta'],
+            'errors'  => null,
+        ]);
+    }
+
     /**
      * Reply to a review on owner's listing.
      */
