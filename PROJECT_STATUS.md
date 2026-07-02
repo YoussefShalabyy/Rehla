@@ -49,8 +49,8 @@
 | 4 | Listings Management | 🟢 Complete | July 1, 2026 |
 | 5 | Availability & Booking | 🟢 Complete | July 1, 2026 |
 | 6 | Payment Integration | 🟢 Complete | July 1, 2026 |
-| 7 | Media Uploads | 🟡 In Progress | — |
-| 8 | Reviews | 🔴 Not Started | — |
+| 7 | Media Uploads | 🟢 Complete | July 2, 2026 |
+| 8 | Reviews | 🟡 In Progress | — |
 | 9 | Notifications | 🔴 Not Started | — |
 | 10 | Admin & Owner Dashboard APIs | 🔴 Not Started | — |
 | 11 | Seeders & Factories | 🔴 Not Started | — |

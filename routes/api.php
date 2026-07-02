@@ -55,12 +55,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [\App\Http\Controllers\Api\Auth\AuthController::class, 'logout']);
     });
 
-    // Owner Routes
-    Route::prefix('owner/listings')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Owner\ListingController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\Owner\ListingController::class, 'store']);
-        Route::put('/{uuid}', [\App\Http\Controllers\Api\Owner\ListingController::class, 'update']);
-        Route::delete('/{uuid}', [\App\Http\Controllers\Api\Owner\ListingController::class, 'destroy']);
+    // Owner Endpoints
+    Route::prefix('owner')->group(function () {
+        Route::get('/listings', [\App\Http\Controllers\Api\Owner\ListingController::class, 'index']);
+        Route::post('/listings', [\App\Http\Controllers\Api\Owner\ListingController::class, 'store']);
+        Route::put('/listings/{uuid}', [\App\Http\Controllers\Api\Owner\ListingController::class, 'update']);
+        Route::delete('/listings/{uuid}', [\App\Http\Controllers\Api\Owner\ListingController::class, 'destroy']);
+        
+        // Media Management for Listings
+        Route::post('/listings/{uuid}/media', [\App\Http\Controllers\Api\Owner\MediaController::class, 'upload']);
+        Route::put('/listings/{uuid}/media/reorder', [\App\Http\Controllers\Api\Owner\MediaController::class, 'reorder']);
+
+        // Global Media Management (Delete / Set Primary)
+        Route::delete('/media/{uuid}', [\App\Http\Controllers\Api\Owner\MediaController::class, 'destroy']);
+        Route::put('/media/{uuid}/primary', [\App\Http\Controllers\Api\Owner\MediaController::class, 'setPrimary']);
     });
 
     Route::prefix('owner/bookings')->group(function () {
