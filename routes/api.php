@@ -28,7 +28,7 @@ Route::get('/health', function () {
 });
 
 // Public Auth Routes
-Route::prefix('auth')->group(function () {
+Route::middleware('throttle:auth')->prefix('auth')->group(function () {
     Route::post('/register', [\App\Http\Controllers\Api\Auth\AuthController::class, 'register']);
     Route::post('/login', [\App\Http\Controllers\Api\Auth\AuthController::class, 'login']);
     Route::post('/google', [\App\Http\Controllers\Api\Auth\AuthController::class, 'google']);
@@ -36,7 +36,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // Webhook Routes (No Auth required)
-Route::prefix('webhooks')->group(function () {
+Route::middleware('throttle:webhook')->prefix('webhooks')->group(function () {
     Route::post('/paymob', [\App\Http\Controllers\Api\Webhook\PaymobWebhookController::class, 'handle']);
 });
 
@@ -138,7 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Customer Payment Routes
-    Route::prefix('payments')->group(function () {
+    Route::middleware('throttle:payment')->prefix('payments')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'initiate']);
         Route::get('/history', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'history']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'show']);
