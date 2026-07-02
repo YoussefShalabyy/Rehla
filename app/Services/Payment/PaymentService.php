@@ -15,12 +15,14 @@ use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Support\Str;
+use App\Services\Notification\NotificationService;
 
 class PaymentService
 {
-    public function __construct(private readonly PaymentGatewayInterface $gateway)
-    {
-    }
+    public function __construct(
+        private PaymentGatewayInterface $gateway,
+        private NotificationService $notificationService
+    ) {}
 
     /**
      * Initiate a payment for a booking.
@@ -127,6 +129,7 @@ class PaymentService
                     'status' => BookingStatus::Confirmed,
                     'payment_status' => \App\Enums\PaymentStatus::Paid,
                 ]);
+                $this->notificationService->notifyBookingConfirmed($payment->booking);
             } else {
                 $payment->update([
                     'status' => PaymentStatus::Failed,

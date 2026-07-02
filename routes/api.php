@@ -101,8 +101,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{uuid}/moderate', [\App\Http\Controllers\Api\Admin\ReviewController::class, 'moderate']);
     });
 
+    // Customer Notifications
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Customer\NotificationController::class, 'index']);
+        Route::get('/unread', [\App\Http\Controllers\Api\Customer\NotificationController::class, 'unreadCount']);
+        Route::put('/read-all', [\App\Http\Controllers\Api\Customer\NotificationController::class, 'markAllAsRead']);
+        Route::put('/{id}/read', [\App\Http\Controllers\Api\Customer\NotificationController::class, 'markAsRead']);
+    });
+
     // Customer Booking Routes
     Route::prefix('bookings')->group(function () {
+        // Bookings
         Route::get('/', [\App\Http\Controllers\Api\Customer\BookingController::class, 'index']);
         Route::post('/', [\App\Http\Controllers\Api\Customer\BookingController::class, 'store']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\Customer\BookingController::class, 'show']);

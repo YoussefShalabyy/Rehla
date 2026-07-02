@@ -16,12 +16,14 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\Services\Notification\NotificationService;
 
 class BookingService
 {
     public function __construct(
         private readonly AvailabilityService $availabilityService,
-        private readonly PricingService $pricingService
+        private readonly PricingService $pricingService,
+        private readonly NotificationService $notificationService
     ) {
     }
 
@@ -90,6 +92,8 @@ class BookingService
                 'grand_total_cents'    => $pricing->grandTotalCents,
             ];
 
+            $this->notificationService->notifyNewBooking($booking);
+
             return $booking;
         });
     }
@@ -116,6 +120,8 @@ class BookingService
             'status'              => BookingStatus::Cancelled,
             'cancellation_reason' => $reason,
         ]);
+
+        $this->notificationService->notifyBookingCancelled($booking);
 
         return $booking;
     }

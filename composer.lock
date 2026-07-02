@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d67ac392f21075fbdb32a1e3c9799139",
+    "content-hash": "1c13237a417bcf5c27674b4241451b44",
     "packages": [
         {
             "name": "brick/math",
@@ -257,6 +257,59 @@
                 "source": "https://github.com/cloudinary/php-transformation-builder-sdk/tree/2.1.5"
             },
             "time": "2026-04-29T12:17:58+00:00"
+        },
+        {
+            "name": "ctwillie/expo-server-sdk-php",
+            "version": "v2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ctwillie/expo-server-sdk-php.git",
+                "reference": "79fa28da3886e6dba8a51e4c5a6a44df66469f92"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ctwillie/expo-server-sdk-php/zipball/79fa28da3886e6dba8a51e4c5a6a44df66469f92",
+                "reference": "79fa28da3886e6dba8a51e4c5a6a44df66469f92",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-zlib": "*",
+                "guzzlehttp/guzzle": "^6|^7",
+                "php": ">=7.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ExpoSDK\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cedric Twillie",
+                    "email": "ctwillie77@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Server-side library for working with Expo using PHP",
+            "homepage": "https://github.com/ctwillie/expo-server-sdk-php",
+            "keywords": [
+                "expo",
+                "expo-server-sdk-php",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/ctwillie/expo-server-sdk-php/issues",
+                "source": "https://github.com/ctwillie/expo-server-sdk-php"
+            },
+            "time": "2023-12-02T00:34:02+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
