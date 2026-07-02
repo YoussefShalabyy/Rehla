@@ -35,10 +35,16 @@ Route::prefix('auth')->group(function () {
     Route::post('/apple', [\App\Http\Controllers\Api\Auth\AuthController::class, 'apple']);
 });
 
-// Public Listing Routes
+// Webhook Routes (No Auth required)
+Route::prefix('webhooks')->group(function () {
+    Route::post('/paymob', [\App\Http\Controllers\Api\Webhook\PaymobWebhookController::class, 'handle']);
+});
+
+// Public Listing & Booking Routes
 Route::prefix('listings')->group(function () {
     Route::get('/', [\App\Http\Controllers\Api\Customer\ListingController::class, 'index']);
     Route::get('/{uuid}', [\App\Http\Controllers\Api\Customer\ListingController::class, 'show']);
+    Route::get('/{uuid}/availability', [\App\Http\Controllers\Api\Customer\BookingController::class, 'availability']);
 });
 
 // Protected Routes
@@ -57,11 +63,40 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{uuid}', [\App\Http\Controllers\Api\Owner\ListingController::class, 'destroy']);
     });
 
+    Route::prefix('owner/bookings')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Owner\BookingController::class, 'index']);
+    });
+
+    Route::prefix('owner/availability')->group(function () {
+        Route::post('/block', [\App\Http\Controllers\Api\Owner\AvailabilityController::class, 'block']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\Owner\AvailabilityController::class, 'unblock']);
+    });
+
     // Admin Routes
     Route::prefix('admin/listings')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Admin\ListingController::class, 'index']);
         Route::post('/{uuid}/approve', [\App\Http\Controllers\Api\Admin\ListingController::class, 'approve']);
         Route::post('/{uuid}/reject', [\App\Http\Controllers\Api\Admin\ListingController::class, 'reject']);
+    });
+
+    Route::prefix('admin/bookings')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Admin\BookingController::class, 'index']);
+        Route::put('/{uuid}/status', [\App\Http\Controllers\Api\Admin\BookingController::class, 'updateStatus']);
+    });
+
+    // Customer Booking Routes
+    Route::prefix('bookings')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Customer\BookingController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\Customer\BookingController::class, 'store']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\Customer\BookingController::class, 'show']);
+        Route::post('/{uuid}/cancel', [\App\Http\Controllers\Api\Customer\BookingController::class, 'cancel']);
+    });
+
+    // Customer Payment Routes
+    Route::prefix('payments')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'initiate']);
+        Route::get('/history', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'history']);
+        Route::get('/{uuid}', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'show']);
     });
     
 });

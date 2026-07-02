@@ -47,9 +47,9 @@
 | 2 | Models & Relationships | 🟢 Complete | July 1, 2026 |
 | 3 | Authentication | 🟢 Complete | July 1, 2026 |
 | 4 | Listings Management | 🟢 Complete | July 1, 2026 |
-| 5 | Availability & Booking | 🟡 In Progress | — |
-| 6 | Payment Integration | 🔴 Not Started | — |
-| 7 | Media Uploads | 🔴 Not Started | — |
+| 5 | Availability & Booking | 🟢 Complete | July 1, 2026 |
+| 6 | Payment Integration | 🟢 Complete | July 1, 2026 |
+| 7 | Media Uploads | 🟡 In Progress | — |
 | 8 | Reviews | 🔴 Not Started | — |
 | 9 | Notifications | 🔴 Not Started | — |
 | 10 | Admin & Owner Dashboard APIs | 🔴 Not Started | — |

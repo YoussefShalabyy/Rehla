@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('gateway', ['paymob', 'revenuecat', 'stripe', 'fawry', 'paypal', 'null_adapter']);
             $table->string('gateway_transaction_id')->nullable();
             $table->json('provider_response')->nullable();
-            $table->enum('status', ['pending', 'succeeded', 'failed', 'refunded'])->default('pending');
+            $table->enum('status', ['pending', 'paid', 'failed', 'refunded'])->default('pending');
             $table->string('payment_method')->nullable();
             $table->json('metadata')->nullable();
             $table->softDeletes();
