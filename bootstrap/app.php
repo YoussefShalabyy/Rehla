@@ -50,9 +50,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            $firstError = collect($e->errors())->first()[0] ?? 'Validation failed.';
+
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed.',
+                'message' => $firstError,
                 'data'    => null,
                 'meta'    => null,
                 'errors'  => $e->errors(),

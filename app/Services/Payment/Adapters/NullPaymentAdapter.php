@@ -18,7 +18,7 @@ final class NullPaymentAdapter implements PaymentGatewayInterface
         return [
             'success'      => true,
             'transaction_id' => 'null-txn-' . uniqid(),
-            'checkout_url' => null,
+            'checkout_url' => 'https://paymob.com/checkout/fake-id-' . uniqid(),
             'raw'          => ['adapter' => 'null'],
         ];
     }
