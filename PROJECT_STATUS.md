@@ -50,8 +50,8 @@
 | 5 | Availability & Booking | 🟢 Complete | July 1, 2026 |
 | 6 | Payment Integration | 🟢 Complete | July 1, 2026 |
 | 7 | Media Uploads | 🟢 Complete | July 2, 2026 |
-| 8 | Reviews | 🟡 In Progress | — |
-| 9 | Notifications | 🔴 Not Started | — |
+| 8 | Reviews | 🟢 Complete | July 2, 2026 |
+| 9 | Notifications | 🟡 In Progress | — |
 | 10 | Admin & Owner Dashboard APIs | 🔴 Not Started | — |
 | 11 | Seeders & Factories | 🔴 Not Started | — |
 | 12 | Security Hardening & Production Readiness | 🔴 Not Started | — |

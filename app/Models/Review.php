@@ -16,6 +16,13 @@ class Review extends Model
 
     protected $guarded = ['id', 'created_at', 'updated_at', 'deleted_at'];
 
+    protected static function booted(): void
+    {
+        static::creating(function (Review $review) {
+            $review->uuid = (string) \Illuminate\Support\Str::uuid();
+        });
+    }
+
     protected function casts(): array
     {
         return [

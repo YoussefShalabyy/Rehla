@@ -45,6 +45,7 @@ Route::prefix('listings')->group(function () {
     Route::get('/', [\App\Http\Controllers\Api\Customer\ListingController::class, 'index']);
     Route::get('/{uuid}', [\App\Http\Controllers\Api\Customer\ListingController::class, 'show']);
     Route::get('/{uuid}/availability', [\App\Http\Controllers\Api\Customer\BookingController::class, 'availability']);
+    Route::get('/{uuid}/reviews', [\App\Http\Controllers\Api\Customer\ReviewController::class, 'index']);
 });
 
 // Protected Routes
@@ -69,6 +70,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Global Media Management (Delete / Set Primary)
         Route::delete('/media/{uuid}', [\App\Http\Controllers\Api\Owner\MediaController::class, 'destroy']);
         Route::put('/media/{uuid}/primary', [\App\Http\Controllers\Api\Owner\MediaController::class, 'setPrimary']);
+        
+        // Owner Review Management
+        Route::post('/reviews/{uuid}/reply', [\App\Http\Controllers\Api\Owner\ReviewController::class, 'reply']);
     });
 
     Route::prefix('owner/bookings')->group(function () {
@@ -92,6 +96,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{uuid}/status', [\App\Http\Controllers\Api\Admin\BookingController::class, 'updateStatus']);
     });
 
+    Route::prefix('admin/reviews')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Admin\ReviewController::class, 'index']);
+        Route::put('/{uuid}/moderate', [\App\Http\Controllers\Api\Admin\ReviewController::class, 'moderate']);
+    });
+
     // Customer Booking Routes
     Route::prefix('bookings')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Customer\BookingController::class, 'index']);
@@ -105,6 +114,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'initiate']);
         Route::get('/history', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'history']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\Customer\PaymentController::class, 'show']);
+    });
+
+    // Customer Review Routes
+    Route::prefix('reviews')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\Customer\ReviewController::class, 'store']);
     });
     
 });
