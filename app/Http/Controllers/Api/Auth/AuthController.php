@@ -58,15 +58,31 @@ class AuthController extends Controller
             'User profile retrieved successfully.'
         );
     }
+
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $user = $request->user();
+        $user->update($request->only('name', 'phone'));
+
+        return $this->success(
+            new AuthUserResource($user),
+            'Profile updated successfully.'
+        );
+    }
     
     // Social stubs
     public function google(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'id_token' => 'required|string',
-            'email' => 'required|email', // in reality extracted from token
-            'name' => 'required|string', // in reality extracted from token
-            'provider_id' => 'required|string', // in reality extracted from token
+            'email' => 'required|email',
+            'name' => 'required|string',
+            'provider_id' => 'required|string',
         ]);
 
         // MOCK validation: Normally we verify $request->id_token with Google

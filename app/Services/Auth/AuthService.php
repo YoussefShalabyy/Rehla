@@ -30,6 +30,12 @@ class AuthService
 
         event(new Registered($user));
 
+        \App\Models\Wallet::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'user_id' => $user->id,
+            'balance_cents' => 0,
+        ]);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
@@ -89,6 +95,12 @@ class AuthService
             ]);
             
             event(new Registered($user));
+
+            \App\Models\Wallet::create([
+                'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'user_id' => $user->id,
+                'balance_cents' => 0,
+            ]);
         } else {
             // Update provider info if logging in with social for the first time on existing email
             if (! $user->provider_id) {

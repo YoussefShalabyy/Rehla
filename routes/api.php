@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::prefix('auth')->group(function () {
         Route::get('/me', [\App\Http\Controllers\Api\Auth\AuthController::class, 'me']);
+        Route::put('/profile', [\App\Http\Controllers\Api\Auth\AuthController::class, 'updateProfile']);
         Route::post('/logout', [\App\Http\Controllers\Api\Auth\AuthController::class, 'logout']);
     });
 
@@ -149,4 +150,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\Customer\ReviewController::class, 'store']);
     });
     
+    // Customer Wishlist Routes
+    Route::prefix('wishlists')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Customer\WishlistController::class, 'index']);
+        Route::post('/{listingUuid}', [\App\Http\Controllers\Api\Customer\WishlistController::class, 'toggle']);
+    });
+
+    // Customer Wallet Routes
+    Route::prefix('wallet')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Customer\WalletController::class, 'getWallet']);
+    });
 });
