@@ -50,6 +50,8 @@ class BookingService
             }
 
             // 2. Check Availability inside the lock
+            // (Disabled for 'Always Open' strategy)
+            /*
             $isAvailable = $this->availabilityService->isAvailable(
                 $listing,
                 $dto->checkInDate,
@@ -59,6 +61,7 @@ class BookingService
             if (! $isAvailable) {
                 throw new BookingConflictException('The requested dates are not available.');
             }
+            */
 
             // 3. Calculate Pricing
             $pricing = $this->pricingService->calculate(

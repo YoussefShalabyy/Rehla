@@ -65,6 +65,11 @@ class Listing extends Model
         return $this->hasMany(AvailabilityBlock::class);
     }
 
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', ListingStatus::Published);

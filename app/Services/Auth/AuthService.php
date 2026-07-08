@@ -114,4 +114,18 @@ class AuthService
 
         return $user;
     }
+
+    public function deleteAccount(User $user): void
+    {
+        // Revoke all tokens
+        $user->tokens()->delete();
+
+        // Soft delete all user's listings (if they are a provider)
+        foreach ($user->listings as $listing) {
+            $listing->delete();
+        }
+
+        // Soft delete the user
+        $user->delete();
+    }
 }

@@ -54,6 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::get('/me', [\App\Http\Controllers\Api\Auth\AuthController::class, 'me']);
         Route::put('/profile', [\App\Http\Controllers\Api\Auth\AuthController::class, 'updateProfile']);
+        Route::delete('/delete', [\App\Http\Controllers\Api\Auth\AuthController::class, 'deleteAccount']);
         Route::post('/logout', [\App\Http\Controllers\Api\Auth\AuthController::class, 'logout']);
     });
 

@@ -91,7 +91,7 @@ class HugeIntegrationSeeder extends Seeder
                         'entity_id' => $listing->id,
                         'type' => 'image',
                         'provider' => 'cloudinary',
-                        'url' => "https://source.unsplash.com/800x600/?" . ($isCar ? "car" : "villa") . "&sig={$listing->id}{$img}",
+                        'url' => "https://loremflickr.com/800/600/" . ($isCar ? "car" : "villa") . "?lock={$listing->id}{$img}",
                         'public_id' => "dummy_public_id_{$img}",
                         'order' => $img,
                         'is_primary' => $img === 1,

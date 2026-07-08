@@ -39,12 +39,16 @@ class PricingService
 
         $subtotal = $baseTotalCents + $cleaningFeeCents + $extraGuestFeeCents;
 
-        // Platform fee percentage (default 10%)
-        // The platform setting value might be a string "10" or "10.5".
-        $platformFeePercentage = (float) PlatformSetting::get('platform_fee_percentage', 10);
-        $platformFeeCents = (int) round($subtotal * ($platformFeePercentage / 100));
+        // Platform fee waived for promotion
+        $platformFeeCents = 0;
 
-        $grandTotalCents = $subtotal + $platformFeeCents;
+        // Taxes (5%)
+        $taxesCents = (int) round($subtotal * 0.05);
+
+        // Rehla VIP Discount (10% off base)
+        $discountAmountCents = (int) round($subtotal * 0.10);
+
+        $grandTotalCents = $subtotal + $taxesCents + $platformFeeCents - $discountAmountCents;
 
         return new PricingResultDTO(
             nights: $nights,

@@ -125,4 +125,12 @@ class AuthController extends Controller
             'token' => $token,
         ], 'Logged in with Apple successfully.');
     }
+    
+
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $this->authService->deleteAccount($request->user());
+
+        return $this->success(null, 'Account deleted successfully.');
+    }
 }

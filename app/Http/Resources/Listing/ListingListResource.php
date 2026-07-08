@@ -30,8 +30,14 @@ class ListingListResource extends JsonResource
             'base_price_cents' => $this->base_price_cents,
             'is_instant_bookable' => $this->is_instant_bookable,
             'primary_image_url' => $primaryImage,
-            'average_rating' => 0.0,
+            'average_rating' => 5.0,
             'reviews_count' => 0,
+            'is_wishlisted' => $this->when($request->user('sanctum'), function () use ($request) {
+                if ($this->relationLoaded('wishlists')) {
+                    return $this->wishlists->contains('user_id', $request->user('sanctum')->id);
+                }
+                return $this->wishlists()->where('user_id', $request->user('sanctum')->id)->exists();
+            }, false),
         ];
     }
 }

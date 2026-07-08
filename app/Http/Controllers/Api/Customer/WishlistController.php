@@ -15,7 +15,7 @@ class WishlistController extends Controller
     {
         $user = $request->user();
         
-        $wishlists = Wishlist::with(['listing.primaryMedia', 'listing.owner', 'listing.amenities'])
+        $wishlists = Wishlist::with(['listing.media', 'listing.wishlists'])
             ->where('user_id', $user->id)
             ->get()
             ->pluck('listing');

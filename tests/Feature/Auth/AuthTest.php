@@ -214,3 +214,49 @@ it('social auth returns existing user', function () {
 
     expect(User::where('email', 'existing@example.com')->count())->toBe(1);
 });
+
+it('social auth creates user if not exists for apple', function () {
+    $response = $this->postJson('/api/v1/auth/apple', [
+        'identity_token' => 'mock_token',
+        'email' => 'apple@example.com',
+        'name' => 'Apple User',
+        'provider_id' => 'apple_123',
+    ]);
+
+    $response->assertStatus(200)
+        ->assertJsonPath('success', true);
+
+    $this->assertDatabaseHas('users', [
+        'email' => 'apple@example.com',
+        'provider' => 'apple',
+        'provider_id' => 'apple_123',
+    ]);
+});
+
+it('can delete account', function () {
+    $user = User::create([
+        'uuid' => (string) str()->uuid(),
+        'name' => 'To Be Deleted',
+        'email' => 'delete@example.com',
+        'password' => Hash::make('password123'),
+        'role' => UserRole::Customer,
+    ]);
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    $response = $this->withToken($token)->deleteJson('/api/v1/auth/delete');
+
+    $response->assertStatus(200)
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('message', 'Account deleted successfully.');
+
+    $this->assertSoftDeleted('users', [
+        'id' => $user->id,
+        'email' => 'delete@example.com',
+    ]);
+});
+
+it('returns 401 when deleting account unauthenticated', function () {
+    $response = $this->deleteJson('/api/v1/auth/delete');
+    $response->assertStatus(401);
+});
