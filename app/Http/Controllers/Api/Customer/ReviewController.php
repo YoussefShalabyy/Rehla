@@ -20,6 +20,33 @@ class ReviewController extends Controller
     public function __construct(private ReviewService $reviewService) {}
 
     /**
+     * Get a pending completed booking that needs a review.
+     */
+    public function pending(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $booking = Booking::with('listing.media')
+            ->where('customer_id', $user->id)
+            ->where('status', \App\Enums\BookingStatus::Completed)
+            ->whereDoesntHave('review')
+            ->orderBy('check_out_date', 'desc')
+            ->first();
+
+        if (!$booking) {
+            return response()->json([
+                'success' => true,
+                'data' => null
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => new \App\Http\Resources\Booking\BookingResource($booking)
+        ]);
+    }
+
+    /**
      * Create a new review for a completed booking.
      */
     public function store(CreateReviewRequest $request): JsonResponse

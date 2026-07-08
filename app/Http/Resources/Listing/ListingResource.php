@@ -57,8 +57,11 @@ class ListingResource extends JsonResource
             }),
             
             // Computed fields (mocked for now, will be implemented with Reviews phase)
-            'average_rating' => 5.0,
-            'reviews_count' => 0,
+            'average_rating' => $this->average_rating,
+            'reviews_count' => $this->reviews_count,
+            'latest_reviews' => $this->whenLoaded('reviews', function () {
+                return \App\Http\Resources\Review\ReviewResource::collection($this->reviews);
+            }),
             'is_wishlisted' => $this->when($request->user('sanctum'), function () use ($request) {
                 if ($this->relationLoaded('wishlists')) {
                     return $this->wishlists->contains('user_id', $request->user('sanctum')->id);

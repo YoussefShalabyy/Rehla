@@ -34,6 +34,10 @@ class ListingService
             $query->where('property_type', $dto->propertyType);
         }
 
+        if ($dto->category) {
+            $query->where('category', $dto->category);
+        }
+
         if ($dto->guests) {
             $query->where('max_guests', '>=', $dto->guests);
         }
@@ -64,6 +68,25 @@ class ListingService
             });
         }
 
+        if ($dto->q) {
+            $query->where(function ($q) use ($dto) {
+                $q->where('title', 'like', "%{$dto->q}%")
+                  ->orWhere('city', 'like', "%{$dto->q}%")
+                  ->orWhere('country', 'like', "%{$dto->q}%");
+            });
+        }
+
+        if ($dto->sortBy) {
+            $direction = strtolower($dto->sortDirection ?? 'asc') === 'desc' ? 'desc' : 'asc';
+            if (in_array($dto->sortBy, ['price', 'title', 'created_at'])) {
+                $column = $dto->sortBy === 'price' ? 'base_price_cents' : $dto->sortBy;
+                $query->orderBy($column, $direction);
+            }
+        } else {
+            // Default sort
+            $query->latest();
+        }
+
         return $query->paginate($dto->perPage, ['*'], 'page', $dto->page);
     }
 
@@ -72,7 +95,17 @@ class ListingService
      */
     public function findByUuid(string $uuid): Listing
     {
-        $listing = Listing::with(['owner', 'amenities', 'media'])->where('uuid', $uuid)->first();
+        $listing = Listing::with([
+            'owner', 
+            'amenities', 
+            'media', 
+            'reviews' => function($q) {
+                $q->where('status', \App\Enums\ReviewStatus::Approved)
+                  ->latest()
+                  ->take(3)
+                  ->with('reviewer');
+            }
+        ])->where('uuid', $uuid)->first();
 
         if (! $listing) {
             throw new NotFoundException('Listing not found.');

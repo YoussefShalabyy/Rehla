@@ -26,7 +26,7 @@ class BookingController extends Controller
     public function index(Request $request): JsonResponse
     {
         $bookings = Booking::where('customer_id', $request->user()->id)
-            ->with(['listing'])
+            ->with(['listing.media', 'listing.owner'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -55,7 +55,7 @@ class BookingController extends Controller
             return $this->error('Unauthorized to view this booking.', 403);
         }
 
-        $booking->load(['listing']);
+        $booking->load(['listing.media', 'listing.owner']);
 
         return $this->success(new BookingResource($booking));
     }
@@ -84,5 +84,30 @@ class BookingController extends Controller
         $blockedDates = $this->availabilityService->getBlockedDates($listing, $month);
 
         return $this->success(['blocked_dates' => $blockedDates]);
+    }
+
+    public function reschedule(Request $request, string $uuid): JsonResponse
+    {
+        $request->validate([
+            'check_in_date'  => ['required', 'date'],
+            'check_out_date' => ['required', 'date', 'after:check_in_date'],
+        ]);
+
+        $booking = $this->bookingService->findByUuid($uuid);
+
+        if ($request->user()->cannot('view', $booking)) {
+            return $this->error('Unauthorized to reschedule this booking.', 403);
+        }
+
+        $rescheduledBooking = $this->bookingService->rescheduleBooking(
+            $booking,
+            $request->input('check_in_date'),
+            $request->input('check_out_date'),
+            $request->user()
+        );
+
+        $rescheduledBooking->load(['listing.media', 'listing.owner']);
+
+        return $this->success(new BookingResource($rescheduledBooking), 'Booking rescheduled successfully.');
     }
 }

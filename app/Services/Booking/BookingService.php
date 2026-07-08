@@ -160,4 +160,33 @@ class BookingService
 
         return $booking;
     }
+
+    /**
+     * Reschedule an existing booking
+     */
+    public function rescheduleBooking(Booking $booking, string $newCheckIn, string $newCheckOut, User $requester): Booking
+    {
+        if (! in_array($booking->status, [BookingStatus::Pending, BookingStatus::Confirmed])) {
+            throw new HttpException(422, 'Only pending or confirmed bookings can be rescheduled.');
+        }
+
+        // Recalculate price
+        $listing = $booking->listing;
+        
+        $pricing = $this->pricingService->calculate(
+            $listing,
+            $newCheckIn,
+            $newCheckOut,
+            $booking->guests_count
+        );
+
+        $booking->update([
+            'check_in_date'      => $newCheckIn,
+            'check_out_date'     => $newCheckOut,
+            'total_amount_cents' => $pricing->grandTotalCents,
+            'platform_fee_cents' => $pricing->platformFeeCents,
+        ]);
+
+        return $booking;
+    }
 }

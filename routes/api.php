@@ -137,6 +137,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\Customer\BookingController::class, 'store']);
         Route::get('/{uuid}', [\App\Http\Controllers\Api\Customer\BookingController::class, 'show']);
         Route::post('/{uuid}/cancel', [\App\Http\Controllers\Api\Customer\BookingController::class, 'cancel']);
+        Route::post('/{uuid}/reschedule', [\App\Http\Controllers\Api\Customer\BookingController::class, 'reschedule']);
     });
 
     // Customer Payment Routes
@@ -148,6 +149,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Customer Review Routes
     Route::prefix('reviews')->group(function () {
+        Route::get('/pending', [\App\Http\Controllers\Api\Customer\ReviewController::class, 'pending']);
         Route::post('/', [\App\Http\Controllers\Api\Customer\ReviewController::class, 'store']);
     });
     

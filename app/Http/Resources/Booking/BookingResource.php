@@ -30,15 +30,24 @@ class BookingResource extends JsonResource
             'platform_fee_cents' => $this->platform_fee_cents,
             'currency'           => $this->currency,
             'notes'              => $this->notes,
+            'is_reviewed'        => $this->relationLoaded('review') ? $this->review !== null : $this->review()->exists(),
             'created_at'         => $this->created_at->toIso8601String(),
         ];
 
         // If listing is loaded, return it but avoiding a massive response if not fully eager loaded
         if ($this->relationLoaded('listing')) {
+            $primaryMedia = null;
+            if ($this->listing->relationLoaded('media')) {
+                $primaryMedia = $this->listing->media->where('is_primary', true)->first() ?? $this->listing->media->first();
+            }
+
             $data['listing'] = [
                 'uuid'  => $this->listing->uuid,
                 'title' => $this->listing->title,
                 'city'  => $this->listing->city,
+                'country' => $this->listing->country ?? 'Egypt',
+                'type' => $this->listing->type,
+                'primary_image_url' => $primaryMedia ? $primaryMedia->url : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800',
             ];
         }
 

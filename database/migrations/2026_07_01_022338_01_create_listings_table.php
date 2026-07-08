@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
             $table->enum('type', ['property', 'car']);
             $table->enum('property_type', ['hotel', 'apartment', 'villa'])->nullable();
+            $table->enum('category', ['luxury', 'sports', 'family', 'economy'])->nullable();
             $table->string('title');
             $table->text('description');
             $table->string('address');

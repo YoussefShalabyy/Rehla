@@ -54,19 +54,32 @@ class HugeIntegrationSeeder extends Seeder
             $providers[] = $user;
         }
 
-        // 3. Create 100 Listings (Villas and Cars)
+        // Define templates for all types and categories to ensure the UI horizontal lists are fully populated
+        $templates = [
+            ['type' => ListingType::Property, 'prop_type' => PropertyType::Villa, 'car_cat' => null, 'name' => 'Beautiful Villa', 'images' => ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80', 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&q=80']],
+            ['type' => ListingType::Property, 'prop_type' => PropertyType::Apartment, 'car_cat' => null, 'name' => 'Luxury Apartment', 'images' => ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80', 'https://images.unsplash.com/photo-1502672260266-1c15a8223041?w=800&q=80', 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80']],
+            ['type' => ListingType::Property, 'prop_type' => PropertyType::Hotel, 'car_cat' => null, 'name' => 'Grand Hotel Suite', 'images' => ['https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80', 'https://images.unsplash.com/photo-1551882547-ff40c0d5b5df?w=800&q=80', 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=800&q=80']],
+            ['type' => ListingType::Car, 'prop_type' => null, 'car_cat' => 'luxury', 'name' => 'Mercedes S Class', 'images' => ['https://images.unsplash.com/photo-1563720223185-11003d516935?w=800&q=80', 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=800&q=80', 'https://images.unsplash.com/photo-1555626906-fcf10d6851b4?w=800&q=80']],
+            ['type' => ListingType::Car, 'prop_type' => null, 'car_cat' => 'sports', 'name' => 'Ferrari Spider', 'images' => ['https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&q=80', 'https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=800&q=80', 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?w=800&q=80']],
+            ['type' => ListingType::Car, 'prop_type' => null, 'car_cat' => 'economy', 'name' => 'Toyota Corolla', 'images' => ['https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800&q=80', 'https://images.unsplash.com/photo-1590362891991-f700075c1973?w=800&q=80', 'https://images.unsplash.com/photo-1605810731427-da28892d1921?w=800&q=80']],
+            ['type' => ListingType::Car, 'prop_type' => null, 'car_cat' => 'family', 'name' => 'Honda CRV SUV', 'images' => ['https://images.unsplash.com/photo-1550130635-c3cbf4c1eb16?w=800&q=80', 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=80', 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=80']],
+        ];
+
+        // 3. Create Listings
         $listings = [];
         foreach ($providers as $provider) {
-            for ($j = 1; $j <= 10; $j++) {
-                $isCar = $j % 3 === 0;
+            // Give each provider one of each template
+            foreach ($templates as $j => $tpl) {
+                $isCar = $tpl['type'] === ListingType::Car;
                 
                 $listing = Listing::create([
                     'uuid' => Str::uuid(),
                     'owner_id' => $provider->id,
-                    'title' => $isCar ? "Luxury Car Model {$j}" : "Beautiful Villa {$j}",
-                    'description' => "This is a fantastic place or car for your next trip. Enjoy premium comfort.",
-                    'type' => $isCar ? ListingType::Car : ListingType::Property,
-                    'property_type' => $isCar ? null : PropertyType::Villa,
+                    'title' => $tpl['name'] . " " . random_int(100, 999),
+                    'description' => "This is a fantastic place or car for your next trip. Enjoy premium comfort and a seamless experience. Highly recommended for couples and families looking to explore.",
+                    'type' => $tpl['type'],
+                    'property_type' => $tpl['prop_type'],
+                    'category' => $tpl['car_cat'],
                     'status' => ListingStatus::Published,
                     'base_price_cents' => random_int(5000, 50000), // $50 to $500
                     'cleaning_fee_cents' => $isCar ? 0 : 5000,
@@ -74,7 +87,7 @@ class HugeIntegrationSeeder extends Seeder
                     'max_guests' => $isCar ? 4 : random_int(2, 10),
                     'country' => 'Egypt',
                     'city' => ['Cairo', 'Alexandria', 'Gouna', 'Sharm El Sheikh'][array_rand(['Cairo', 'Alexandria', 'Gouna', 'Sharm El Sheikh'])],
-                    'address' => "123 Random St, Area {$j}",
+                    'address' => "123 Random St, Area " . random_int(1, 100),
                     'latitude' => 30.0444 + (lcg_value() / 10),
                     'longitude' => 31.2357 + (lcg_value() / 10),
                     'is_instant_bookable' => true,
@@ -83,18 +96,18 @@ class HugeIntegrationSeeder extends Seeder
                 // Attach amenities
                 $listing->amenities()->attach(array_rand(array_flip($amenityIds), 3));
 
-                // Attach 3 dummy images
-                for ($img = 1; $img <= 3; $img++) {
+                // Attach 3 static unsplash images
+                foreach ($tpl['images'] as $index => $imgUrl) {
                     Media::create([
                         'uuid' => Str::uuid(),
                         'entity_type' => Listing::class,
                         'entity_id' => $listing->id,
                         'type' => 'image',
                         'provider' => 'cloudinary',
-                        'url' => "https://loremflickr.com/800/600/" . ($isCar ? "car" : "villa") . "?lock={$listing->id}{$img}",
-                        'public_id' => "dummy_public_id_{$img}",
-                        'order' => $img,
-                        'is_primary' => $img === 1,
+                        'url' => $imgUrl,
+                        'public_id' => "dummy_public_id_{$index}",
+                        'order' => $index + 1,
+                        'is_primary' => $index === 0,
                     ]);
                 }
 
