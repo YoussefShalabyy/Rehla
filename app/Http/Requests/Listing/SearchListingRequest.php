@@ -24,6 +24,9 @@ class SearchListingRequest extends FormRequest
             'guests' => ['nullable', 'integer', 'min:1'],
             'min_price_cents' => ['nullable', 'integer', 'min:0'],
             'max_price_cents' => ['nullable', 'integer', 'gte:min_price_cents'],
+            'lat' => ['nullable', 'numeric'],
+            'lng' => ['nullable', 'numeric'],
+            'radius' => ['nullable', 'integer', 'min:1', 'max:500'],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];

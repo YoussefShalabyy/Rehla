@@ -18,14 +18,82 @@ class ListingService
 {
     public function search(SearchListingDTO $dto): LengthAwarePaginator
     {
+        $query = $this->buildSearchQuery($dto);
+        $count = $query->count();
+
+        // Cairo Fallback Logic
+        if ($count === 0) {
+            $fallbackDto = new SearchListingDTO(
+                city: 'Cairo',
+                type: $dto->type,
+                propertyType: $dto->propertyType,
+                category: $dto->category,
+                checkIn: $dto->checkIn,
+                checkOut: $dto->checkOut,
+                guests: $dto->guests,
+                minPriceCents: $dto->minPriceCents,
+                maxPriceCents: $dto->maxPriceCents,
+                lat: null,
+                lng: null,
+                radius: 50,
+                ipAddress: null,
+                q: $dto->q,
+                sortBy: $dto->sortBy,
+                sortDirection: $dto->sortDirection,
+                page: $dto->page,
+                perPage: $dto->perPage
+            );
+
+            $query = $this->buildSearchQuery($fallbackDto);
+        }
+
+        return $query->paginate($dto->perPage, ['*'], 'page', $dto->page);
+    }
+
+    private function buildSearchQuery(SearchListingDTO $dto): \Illuminate\Database\Eloquent\Builder
+    {
         $query = Listing::query()->with(['media' => fn($q) => $q->where('is_primary', true)]);
 
         $query->where('status', ListingStatus::Published);
 
-        if ($dto->city) {
-            $query->where('city', $dto->city);
+        // Location Logic: Proximity, IP Geolocation, or explicit City
+        if ($dto->lat !== null && $dto->lng !== null) {
+            // Haversine Proximity Filter & Sorting
+            $haversine = "(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude))))";
+            
+            // We select '*' and the computed distance
+            $query->selectRaw("listings.*, {$haversine} AS distance", [$dto->lat, $dto->lng, $dto->lat])
+                  ->whereRaw("{$haversine} <= ?", [$dto->lat, $dto->lng, $dto->lat, $dto->radius]);
+            
+            // If no explicit sort, sort by distance
+            if (!$dto->sortBy) {
+                $query->orderBy('distance', 'asc');
+            }
+        } else {
+            $ipLocationApplied = false;
+            if ($dto->ipAddress && !$dto->city) {
+                // IP Geolocation
+                if ($position = \Stevebauman\Location\Facades\Location::get($dto->ipAddress)) {
+                    if ($position->cityName) {
+                        $query->where('city', $position->cityName);
+                        $ipLocationApplied = true;
+                    }
+                    if ($position->countryName) {
+                        $query->where('country', $position->countryName);
+                    }
+                }
+            }
+
+            // If IP geolocation wasn't applied or failed, use the explicit city filter if provided
+            if (!$ipLocationApplied && $dto->city) {
+                $query->where('city', $dto->city);
+            } elseif (!$ipLocationApplied && !$dto->city) {
+                // Force 0 results so the Cairo fallback triggers below
+                $query->whereRaw('1 = 0');
+            }
         }
 
+        // Other filters
         if ($dto->type) {
             $query->where('type', $dto->type);
         }
@@ -51,14 +119,12 @@ class ListingService
         }
 
         if ($dto->checkIn && $dto->checkOut) {
-            // Check availability - listings that do not have availability blocks intersecting with dates
             $query->whereDoesntHave('availabilityBlocks', function ($q) use ($dto) {
                 $q->where(function ($sub) use ($dto) {
                     $sub->where('start_date', '<', $dto->checkOut)
                         ->where('end_date', '>', $dto->checkIn);
                 });
             });
-            // Also, need to check existing confirmed/active bookings intersection, assuming they block dates
             $query->whereDoesntHave('bookings', function ($q) use ($dto) {
                 $q->whereIn('status', [\App\Enums\BookingStatus::Confirmed, \App\Enums\BookingStatus::Active])
                   ->where(function ($sub) use ($dto) {
@@ -76,18 +142,19 @@ class ListingService
             });
         }
 
+        // Explicit sorting
         if ($dto->sortBy) {
             $direction = strtolower($dto->sortDirection ?? 'asc') === 'desc' ? 'desc' : 'asc';
             if (in_array($dto->sortBy, ['price', 'title', 'created_at'])) {
                 $column = $dto->sortBy === 'price' ? 'base_price_cents' : $dto->sortBy;
                 $query->orderBy($column, $direction);
             }
-        } else {
-            // Default sort
+        } elseif ($dto->lat === null || $dto->lng === null) {
+            // Default sort if no proximity sorting
             $query->latest();
         }
 
-        return $query->paginate($dto->perPage, ['*'], 'page', $dto->page);
+        return $query;
     }
 
     /**
