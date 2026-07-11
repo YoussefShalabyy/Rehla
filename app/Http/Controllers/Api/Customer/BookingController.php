@@ -26,7 +26,7 @@ class BookingController extends Controller
     public function index(Request $request): JsonResponse
     {
         $bookings = Booking::where('customer_id', $request->user()->id)
-            ->with(['listing.media', 'listing.owner'])
+            ->with(['listing.media', 'listing.createdBy'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -55,7 +55,7 @@ class BookingController extends Controller
             return $this->error('Unauthorized to view this booking.', 403);
         }
 
-        $booking->load(['listing.media', 'listing.owner']);
+        $booking->load(['listing.media', 'listing.createdBy']);
 
         return $this->success(new BookingResource($booking));
     }
@@ -106,7 +106,7 @@ class BookingController extends Controller
             $request->user()
         );
 
-        $rescheduledBooking->load(['listing.media', 'listing.owner']);
+        $rescheduledBooking->load(['listing.media', 'listing.createdBy']);
 
         return $this->success(new BookingResource($rescheduledBooking), 'Booking rescheduled successfully.');
     }
