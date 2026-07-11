@@ -1,8 +1,8 @@
 # BUSINESS_RULES.md
 
-**Project:** VistaStay Travel Marketplace MVP  
-**Version:** 1.0  
-**Last Updated:** June 30, 2026  
+**Project:** Rehla Platform MVP  
+**Version:** 2.0  
+**Last Updated:** July 2026  
 **Status:** FINAL (Single Source of Truth alongside the PRD)
 
 ## Purpose
@@ -12,23 +12,20 @@ These rules must be enforced in the Service layer. Controllers should remain thi
 
 ## 1. User & Role Rules
 
-- There are four user types: Customer, Property Owner, Car Rental Company, Admin.
-- Owners and Car Providers must be manually approved by Admin before they can publish listings.
+- There are two user types: Customer, Admin.
 - A user can have only one primary role (RBAC enforced).
 - UUIDs are used for all public user identifiers.
 
 ## 2. Listing Rules
 
-- Listings include Hotels, Apartments, Villas, and Cars.
-- All new listings created by owners/providers start with status **Pending**.
-- Only Admin can change status from Pending → Published (or Rejected).
-- Once Published, owners can manage their own listings (calendar, details).
+- Listings include Accommodations (Hotels, Apartments, Villas, Rooms) and Cars (Luxury, Sports, Economy, Family).
+- All inventory is owned and managed by the platform via the Admin Dashboard.
 - Soft delete supported. Hard delete only by Admin.
 
 ## 3. Availability & Booking Rules
 
 - Availability is managed per listing via a simple calendar.
-- Bookings use **Instant Booking** (no manual approval by owner once listing is published and dates are available).
+- Bookings use **Instant Booking**.
 - Overlapping bookings are strictly prevented using database transactions.
 - A temporary hold is placed during the payment process (expires automatically if payment fails).
 - Booking statuses: Pending (pre-payment), Confirmed, Active, Completed, Cancelled.
@@ -48,7 +45,6 @@ These rules must be enforced in the Service layer. Controllers should remain thi
 - Business logic never depends on a specific provider.
 - Payment is required to confirm a booking.
 - Refunds are supported for cancellations according to the cancellation policy.
-- Payouts to owners/providers are manual in MVP.
 
 ## 6. Cancellation & Refund Rules
 
@@ -66,11 +62,10 @@ These rules must be enforced in the Service layer. Controllers should remain thi
 
 ## 8. Notification Rules
 
-- Customers and Owners receive notifications for key events:
+- Customers and Admins receive notifications for key events:
   - Booking Confirmed
   - Booking Cancelled
   - Check-in reminder
-  - New booking (for owner)
 - Use Expo Push + Email in MVP.
 
 ## 9. Media Rules

@@ -32,6 +32,10 @@ class BookingResource extends JsonResource
             'notes'              => $this->notes,
             'is_reviewed'        => $this->relationLoaded('review') ? $this->review !== null : $this->review()->exists(),
             'created_at'         => $this->created_at->toIso8601String(),
+            'user'               => $this->whenLoaded('customer', fn () => [
+                'name' => $this->customer->name,
+                'email' => $this->customer->email,
+            ]),
         ];
 
         // If listing is loaded, return it but avoiding a massive response if not fully eager loaded

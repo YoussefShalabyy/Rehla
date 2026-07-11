@@ -136,6 +136,7 @@ class ListingService
             'createdBy',
             'amenities',
             'media',
+            'availabilityBlocks',
             'reviews' => function($q) {
                 $q->where('status', \App\Enums\ReviewStatus::Approved)
                   ->latest()

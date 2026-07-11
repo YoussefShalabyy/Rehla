@@ -1,12 +1,12 @@
 # DATABASE_SCHEMA.md
 
-**Project:** VistaStay Travel Marketplace MVP
-**Version:** 1.3
-**Last Updated:** July 1, 2026
+**Project:** Rehla Platform MVP
+**Version:** 2.0
+**Last Updated:** July 2026
 **Status:** FINAL
 
 > **Schema Decisions:**
-> - `users.role = provider` covers both Property Owners and Car Rental Companies. Differentiation within that role is handled at the listing level (`listings.type = property | car`).
+> - The platform owns and manages all supply. There is no provider or host role.
 > - `media` table intentionally has **no soft deletes** — physical deletion via `MediaStorageInterface` is required. Media deletion is irreversible by design.
 > - `availability_blocks` table has no `uuid` — these records are internal/operational and not exposed as public UUIDs.
 
@@ -30,7 +30,7 @@
 - `email_verified_at`
 - `password`
 - `phone` (nullable)
-- `role` (enum: customer, provider, admin)
+- `role` (enum: customer, admin)
 - `status` (enum: active, pending, suspended)
 - `avatar_url` (nullable)
 - `last_login_at` (timestamp, nullable)
@@ -43,9 +43,9 @@
 ### listings
 - `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
 - `uuid` CHAR(36) UNIQUE NOT NULL
-- `owner_id` (foreign → users)
-- `type` (enum: property, car)
-- `property_type` (enum: hotel, apartment, villa, nullable for cars)
+- `created_by` (foreign → users)
+- `type` (enum: accommodation, car)
+- `property_type` (enum: hotel, apartment, villa, room, nullable for cars)
 - `title`
 - `description`
 - `address`
@@ -143,8 +143,8 @@
 - `listing_id` (foreign → listings)
 - `rating` (tinyint 1-5)
 - `comment` (text, nullable)
-- `owner_reply` (text, nullable)
-- `owner_reply_at` (timestamp, nullable)
+- `admin_reply` (text, nullable)
+- `admin_reply_at` (timestamp, nullable)
 - `status` (enum: pending, approved, hidden)
 - `soft_deletes`
 - `timestamps`

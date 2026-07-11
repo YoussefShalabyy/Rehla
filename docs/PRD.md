@@ -1,9 +1,13 @@
-**Product Requirements Document (PRD): Travel Marketplace Platform MVP**
+> **⚠️ CRITICAL ARCHITECTURE NOTE (JULY 2026):**  
+> The backend MVP is complete. The business model has shifted from a peer-to-peer marketplace to a platform-owned inventory model. There are no providers or hosts. All inventory is managed exclusively via the internal Admin Dashboard.  
+> **For the most up-to-date, single source of truth regarding project structure, API usage, and rules, ALWAYS consult `Rehla-Web/Dashboard/docs/`.**
 
-**Version:** 1.3 (Final MVP)  
-**Date:** June 30, 2026  
+**Product Requirements Document (PRD): Travel Platform MVP**
+
+**Version:** 2.0 (Customer MVP)  
+**Date:** July 2026  
 **Author:** Grok (Principal Software Architect, Staff Backend Engineer, Senior PM, Startup CTO)  
-**Project Name:** VistaStay (or similar)
+**Project Name:** Rehla
 
 ### # Project Goal
 The MVP should be completable by one developer (or a very small team) within a reasonable time. Whenever a feature increases complexity without providing significant launch value, move it to Future Phases.
@@ -59,37 +63,34 @@ These will be evaluated only after successful MVP launch and validated product-m
 The architecture should comfortably scale to **1M users** without requiring a full rewrite (through vertical scaling first, then horizontal where needed).
 
 ### # Project Vision
-Deliver a **minimal viable marketplace** that lets customers book basic accommodations (hotels, apartments, villas) and cars from owners/providers. The platform is a pure intermediary collecting a service fee. 
+Deliver a **minimal viable platform** that lets customers book basic accommodations (hotels, apartments, villas, rooms) and cars. The platform owns and manages all inventory via an internal Admin Dashboard. There is no vendor or host portal. 
 
 Focus: Core end-to-end booking loop that works reliably. Production-ready and designed for long-term evolution.
 
 **MVP Success Criteria:** Functional bookings with payments, manual approval workflows, basic trust mechanisms, and simple dashboards.
 
 ### # Problem Statement (MVP)
-Travelers need a simple way to find and book accommodations + cars in one place. Owners/providers need an easy listing and management experience.
+Travelers need a simple way to find and book accommodations + cars in one place.
 
 ### # Business Model (MVP)
-- Configurable platform service fee.  
-- Manual payouts initially.
+- Platform owns the supply.
+- Revenue is generated directly from bookings.
 
 ### # User Types (MVP)
 - Customer  
-- Property Owner  
-- Car Rental Company/Provider  
 - Admin  
 
 ### # Supported Property Types (MVP)
-- Hotels (rooms)  
+- Hotels
 - Apartments  
 - Villas  
-- Cars (basic types)
+- Rooms
+- Cars (Luxury, Sports, Economy, Family)
 
 ### # Complete MVP User Journeys
 **Customer:** Search → Browse → Details → Book (Instant) → Pay → Confirmation → Review.  
 
-**Owner/Provider:** Sign up → Create Listing (Pending) → Admin Approval → Manage Calendar/Bookings.  
-
-**Admin:** Approve listings, manage users/bookings, moderate content.
+**Admin:** Create/Manage listings, manage users/bookings, moderate content via internal Dashboard.
 
 ### # Authentication (MVP)
 Email, Google, Apple + basic verification.
@@ -117,7 +118,7 @@ Adding or replacing payment providers must not require changes to the booking bu
 - Simple cancellation policy.  
 - Verified post-stay reviews.  
 - Expo Push + Email notifications.  
-- **Single React Dashboard** with role-based access (Admin / Owner / Car Provider).
+- **Single React Dashboard** for internal Admins only.
 
 ### # Media (MVP)
 Cloudinary uploads (signed URLs). Metadata only in DB. Each image belongs to exactly one entity.

@@ -62,6 +62,16 @@ class ListingResource extends JsonResource
             'latest_reviews' => $this->whenLoaded('reviews', function () {
                 return \App\Http\Resources\Review\ReviewResource::collection($this->reviews);
             }),
+            'availabilities' => $this->whenLoaded('availabilityBlocks', function () {
+                return $this->availabilityBlocks->map(function ($block) {
+                    return [
+                        'id' => $block->id,
+                        'start_date' => $block->start_date->format('Y-m-d'),
+                        'end_date' => $block->end_date->format('Y-m-d'),
+                        'reason' => $block->reason,
+                    ];
+                });
+            }),
             'is_wishlisted' => $this->when($request->user('sanctum'), function () use ($request) {
                 if ($this->relationLoaded('wishlists')) {
                     return $this->wishlists->contains('user_id', $request->user('sanctum')->id);

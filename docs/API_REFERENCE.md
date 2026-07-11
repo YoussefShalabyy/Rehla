@@ -1,9 +1,9 @@
 # API_REFERENCE.md
 
-**Project:** VistaStay Travel Marketplace MVP
-**Version:** 1.0
-**Last Updated:** July 1, 2026
-**Status:** LIVING DOCUMENT — updated as each phase is implemented
+**Project:** Rehla Platform MVP
+**Version:** 2.0
+**Last Updated:** July 2026
+**Status:** FINAL
 
 > All endpoints are prefixed with `/api/v1/`.
 > All responses follow the standard JSON structure defined in `CODING_STANDARDS.md`.
@@ -64,7 +64,7 @@ POST /api/v1/auth/register
   "role": "customer"
 }
 ```
-**Roles allowed:** `customer`, `provider`
+**Roles allowed:** `customer`
 **Returns:** `201` with user data + token
 
 ---
@@ -146,9 +146,9 @@ GET /api/v1/listings/{uuid}
 
 ---
 
-### Create Listing (Provider only)
+### Create Listing (Admin only)
 ```
-POST /api/v1/listings
+POST /api/v1/admin/listings
 Authorization: Bearer {token}
 ```
 **Body:**
@@ -176,18 +176,18 @@ Authorization: Bearer {token}
 
 ---
 
-### Update Listing (Owner only)
+### Update Listing (Admin only)
 ```
-PUT /api/v1/listings/{uuid}
+PUT /api/v1/admin/listings/{uuid}
 Authorization: Bearer {token}
 ```
 **Returns:** `200`
 
 ---
 
-### Delete Listing (Owner or Admin)
+### Delete Listing (Admin only)
 ```
-DELETE /api/v1/listings/{uuid}
+DELETE /api/v1/admin/listings/{uuid}
 Authorization: Bearer {token}
 ```
 **Returns:** `200` (soft delete)
@@ -290,28 +290,27 @@ Authorization: Bearer {token}
 
 ---
 
-## Phase 5: Owner Availability Endpoints
+## Phase 5: Availability Endpoints
 
-### Block Dates (Owner)
+### Block Dates (Admin)
 ```
-POST /api/v1/owner/availability
+POST /api/v1/admin/listings/{uuid}/availability/block
 Authorization: Bearer {token}
 ```
 **Body:**
 ```json
 {
-  "listing_uuid": "uuid-here",
   "start_date": "2026-09-01",
   "end_date": "2026-09-07",
-  "reason": "Personal use"
+  "reason": "Maintenance"
 }
 ```
 
 ---
 
-### Unblock Dates (Owner)
+### Unblock Dates (Admin)
 ```
-DELETE /api/v1/owner/availability/{id}
+DELETE /api/v1/admin/listings/{uuid}/availability/{id}
 Authorization: Bearer {token}
 ```
 
@@ -346,29 +345,29 @@ POST /api/v1/webhooks/revenuecat
 
 ## Phase 7: Media Endpoints
 
-### Upload Listing Image (Owner)
+### Upload Listing Image (Admin)
 ```
-POST /api/v1/listings/{uuid}/media
+POST /api/v1/admin/listings/{uuid}/media
 Authorization: Bearer {token}
 Content-Type: multipart/form-data
 ```
-**Body:** `file` (image file)
+**Body:** `file` (image file), `type`, `order`, `is_primary`
 **Returns:** `201` with media data including URL
 
 ---
 
-### Delete Media (Owner)
+### Delete Media (Admin)
 ```
-DELETE /api/v1/media/{uuid}
+DELETE /api/v1/admin/media/{uuid}
 Authorization: Bearer {token}
 ```
 **Returns:** `200`
 
 ---
 
-### Reorder Media (Owner)
+### Reorder Media (Admin)
 ```
-PUT /api/v1/listings/{uuid}/media/reorder
+PUT /api/v1/admin/listings/{uuid}/media/reorder
 Authorization: Bearer {token}
 ```
 **Body:**
@@ -378,9 +377,9 @@ Authorization: Bearer {token}
 
 ---
 
-### Set Primary Image (Owner)
+### Set Primary Image (Admin)
 ```
-PUT /api/v1/media/{uuid}/primary
+PUT /api/v1/admin/media/{uuid}/primary
 Authorization: Bearer {token}
 ```
 
@@ -414,9 +413,9 @@ GET /api/v1/listings/{uuid}/reviews
 
 ---
 
-### Owner Reply to Review
+### Admin Reply to Review
 ```
-POST /api/v1/reviews/{uuid}/reply
+POST /api/v1/admin/reviews/{uuid}/reply
 Authorization: Bearer {token}
 ```
 **Body:**
@@ -468,18 +467,9 @@ PUT /api/v1/admin/settings/{key}
 
 ---
 
-## Phase 10: Owner Dashboard Endpoints
-
-```
-GET /api/v1/owner/listings      # My listings
-GET /api/v1/owner/bookings      # Bookings on my listings
-GET /api/v1/owner/revenue       # Revenue summary
-GET /api/v1/owner/reviews       # Reviews on my listings
-```
-
 ---
 
-## Error Codes Reference
+## Phase 10: Admin Dashboard Endpoints
 
 | HTTP Code | Meaning |
 |---|---|
