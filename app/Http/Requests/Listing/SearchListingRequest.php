@@ -18,7 +18,7 @@ class SearchListingRequest extends FormRequest
         return [
             'city' => ['nullable', 'string', 'max:255'],
             'type' => ['nullable', 'in:property,car'],
-            'property_type' => ['nullable', 'in:hotel,apartment,villa'],
+            'property_type' => ['nullable', 'in:hotel,apartment,villa,room'],
             'check_in' => ['nullable', 'date', 'after_or_equal:today'],
             'check_out' => ['nullable', 'date', 'after:check_in'],
             'guests' => ['nullable', 'integer', 'min:1'],

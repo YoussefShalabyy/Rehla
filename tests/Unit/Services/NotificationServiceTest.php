@@ -37,9 +37,9 @@ class NotificationServiceTest extends TestCase
         Mail::fake();
 
         $customer = User::factory()->create(['role' => 'customer']);
-        $owner = User::factory()->create(['role' => 'provider']);
-        $listing = Listing::factory()->create(['owner_id' => $owner->id]);
-        $booking = Booking::factory()->create([
+        $admin    = User::factory()->create(['role' => 'admin']);
+        $listing  = Listing::factory()->create(['created_by' => $admin->id]);
+        $booking  = Booking::factory()->create([
             'customer_id' => $customer->id,
             'listing_id'  => $listing->id,
             'status'      => BookingStatus::Confirmed,
@@ -47,8 +47,8 @@ class NotificationServiceTest extends TestCase
 
         $this->service->notifyBookingConfirmed($booking);
 
-        Queue::assertPushed(SendPushNotification::class, 2); // Customer + Owner
-        Mail::assertQueued(BookingConfirmedMail::class, 1); // Customer email
+        Queue::assertPushed(SendPushNotification::class, 1); // Customer only now (no owner)
+        Mail::assertQueued(BookingConfirmedMail::class, 1);  // Customer email
     }
 
     public function test_push_failure_does_not_throw_exception_to_caller()

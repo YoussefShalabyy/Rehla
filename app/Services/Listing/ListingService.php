@@ -19,33 +19,6 @@ class ListingService
     public function search(SearchListingDTO $dto): LengthAwarePaginator
     {
         $query = $this->buildSearchQuery($dto);
-        $count = $query->count();
-
-        // Cairo Fallback Logic
-        if ($count === 0) {
-            $fallbackDto = new SearchListingDTO(
-                city: 'Cairo',
-                type: $dto->type,
-                propertyType: $dto->propertyType,
-                category: $dto->category,
-                checkIn: $dto->checkIn,
-                checkOut: $dto->checkOut,
-                guests: $dto->guests,
-                minPriceCents: $dto->minPriceCents,
-                maxPriceCents: $dto->maxPriceCents,
-                lat: null,
-                lng: null,
-                radius: 50,
-                ipAddress: null,
-                q: $dto->q,
-                sortBy: $dto->sortBy,
-                sortDirection: $dto->sortDirection,
-                page: $dto->page,
-                perPage: $dto->perPage
-            );
-
-            $query = $this->buildSearchQuery($fallbackDto);
-        }
 
         return $query->paginate($dto->perPage, ['*'], 'page', $dto->page);
     }
@@ -87,9 +60,6 @@ class ListingService
             // If IP geolocation wasn't applied or failed, use the explicit city filter if provided
             if (!$ipLocationApplied && $dto->city) {
                 $query->where('city', $dto->city);
-            } elseif (!$ipLocationApplied && !$dto->city) {
-                // Force 0 results so the Cairo fallback triggers below
-                $query->whereRaw('1 = 0');
             }
         }
 
@@ -163,9 +133,9 @@ class ListingService
     public function findByUuid(string $uuid): Listing
     {
         $listing = Listing::with([
-            'owner', 
-            'amenities', 
-            'media', 
+            'createdBy',
+            'amenities',
+            'media',
             'reviews' => function($q) {
                 $q->where('status', \App\Enums\ReviewStatus::Approved)
                   ->latest()
@@ -181,31 +151,31 @@ class ListingService
         return $listing;
     }
 
-    public function create(CreateListingDTO $dto, User $owner): Listing
+    public function create(CreateListingDTO $dto, User $admin): Listing
     {
-        return DB::transaction(function () use ($dto, $owner) {
+        return DB::transaction(function () use ($dto, $admin) {
             $listing = Listing::create([
-                'uuid' => (string) \Illuminate\Support\Str::uuid(),
-                'owner_id' => $owner->id,
-                'type' => $dto->type,
-                'property_type' => $dto->propertyType,
-                'title' => $dto->title,
-                'description' => $dto->description,
-                'address' => $dto->address,
-                'country' => $dto->country,
-                'city' => $dto->city,
-                'latitude' => $dto->latitude,
-                'longitude' => $dto->longitude,
-                'base_price_cents' => $dto->basePriceCents,
-                'cleaning_fee_cents' => $dto->cleaningFeeCents,
-                'extra_guest_fee_cents' => $dto->extraGuestFeeCents,
-                'max_guests' => $dto->maxGuests,
-                'bedrooms' => $dto->bedrooms,
-                'bathrooms' => $dto->bathrooms,
-                'transmission' => $dto->transmission,
-                'fuel_type' => $dto->fuelType,
-                'status' => ListingStatus::Pending,
-                'is_instant_bookable' => false,
+                'uuid'                   => (string) \Illuminate\Support\Str::uuid(),
+                'created_by'             => $admin->id,
+                'type'                   => $dto->type,
+                'property_type'          => $dto->propertyType,
+                'title'                  => $dto->title,
+                'description'            => $dto->description,
+                'address'                => $dto->address,
+                'country'                => $dto->country,
+                'city'                   => $dto->city,
+                'latitude'               => $dto->latitude,
+                'longitude'              => $dto->longitude,
+                'base_price_cents'       => $dto->basePriceCents,
+                'cleaning_fee_cents'     => $dto->cleaningFeeCents,
+                'extra_guest_fee_cents'  => $dto->extraGuestFeeCents,
+                'max_guests'             => $dto->maxGuests,
+                'bedrooms'               => $dto->bedrooms,
+                'bathrooms'              => $dto->bathrooms,
+                'transmission'           => $dto->transmission,
+                'fuel_type'              => $dto->fuelType,
+                'status'                 => ListingStatus::Published, // Admin-created listings are immediately published
+                'is_instant_bookable'    => true,
             ]);
 
             if (!empty($dto->amenityIds)) {
@@ -255,7 +225,7 @@ class ListingService
     public function approve(Listing $listing, User $admin): Listing
     {
         if ($listing->status !== ListingStatus::Pending) {
-            throw new \App\Exceptions\BaseException('Only pending listings can be approved.', 400);
+            throw new \App\Exceptions\InvalidListingStatusException('Only pending listings can be approved.', 400);
         }
 
         $listing->update(['status' => ListingStatus::Published]);
@@ -266,7 +236,7 @@ class ListingService
     public function reject(Listing $listing, User $admin, string $reason): Listing
     {
         if ($listing->status !== ListingStatus::Pending) {
-            throw new \App\Exceptions\BaseException('Only pending listings can be rejected.', 400);
+            throw new \App\Exceptions\InvalidListingStatusException('Only pending listings can be rejected.', 400);
         }
 
         $listing->update(['status' => ListingStatus::Rejected]);
@@ -282,17 +252,9 @@ class ListingService
         $listing->delete();
     }
 
-    public function getOwnerListings(User $owner, int $perPage = 20): LengthAwarePaginator
-    {
-        return Listing::with(['media' => fn($q) => $q->where('is_primary', true)])
-            ->where('owner_id', $owner->id)
-            ->latest()
-            ->paginate($perPage);
-    }
-
     public function getAllForAdmin(?string $status = null, int $perPage = 20): LengthAwarePaginator
     {
-        $query = Listing::query()->with(['owner', 'media' => fn($q) => $q->where('is_primary', true)]);
+        $query = Listing::query()->with(['createdBy', 'media' => fn($q) => $q->where('is_primary', true)]);
 
         if ($status) {
             $enumStatus = ListingStatus::tryFrom($status);

@@ -40,32 +40,28 @@ class ReviewService
             throw new HttpException(422, 'A review for this booking already exists.');
         }
 
-        return Review::create([
+        $review = Review::create([
             'booking_id'  => $booking->id,
             'reviewer_id' => $customer->id,
             'listing_id'  => $booking->listing_id,
             'rating'      => $dto->rating,
             'comment'     => $dto->comment,
-            'status'      => ReviewStatus::Approved, // Default to approved in MVP unless configured otherwise
+            'status'      => ReviewStatus::Approved,
         ]);
+
+        // Recalculate the listing's real average rating
+        $this->recalculateListingRating($booking->listing);
+
+        return $review;
     }
 
     /**
-     * Owner replies to a review.
-     * Enforces:
-     * - owner of listing === user
-     * - reply not already set
+     * Admin replies to a review from the dashboard.
      */
-    public function ownerReply(Review $review, string $reply, User $owner): Review
+    public function adminReply(Review $review, string $reply, User $admin): Review
     {
-        $review->loadMissing('listing');
-
-        if ($review->listing->owner_id !== $owner->id) {
-            throw new UnauthorizedActionException('You can only reply to reviews on your own listings.');
-        }
-
         if (!empty($review->owner_reply)) {
-            throw new HttpException(422, 'You have already replied to this review.');
+            throw new HttpException(422, 'A reply has already been added to this review.');
         }
 
         $review->update([
@@ -77,12 +73,33 @@ class ReviewService
     }
 
     /**
-     * Admin moderates a review (e.g. hides it).
+     * Admin moderates a review (approve / hide).
      */
     public function moderate(Review $review, ReviewStatus $status, User $admin): Review
     {
         $review->update(['status' => $status]);
+
+        // Recalculate listing rating since approved reviews changed
+        $this->recalculateListingRating($review->listing);
+
         return $review;
+    }
+
+    /**
+     * Recalculate and persist the real average_rating and total_reviews
+     * on a listing based on approved reviews.
+     */
+    public function recalculateListingRating(Listing $listing): void
+    {
+        $stats = Review::where('listing_id', $listing->id)
+            ->where('status', ReviewStatus::Approved)
+            ->selectRaw('COUNT(*) as total, AVG(rating) as average')
+            ->first();
+
+        $listing->update([
+            'average_rating' => $stats->average ? round((float) $stats->average, 2) : 0.00,
+            'total_reviews'  => (int) $stats->total,
+        ]);
     }
 
     /**
@@ -95,17 +112,5 @@ class ReviewService
             ->where('status', ReviewStatus::Approved)
             ->latest()
             ->paginate($perPage);
-    }
-
-    /**
-     * Get average rating for a listing (computed from approved reviews only).
-     */
-    public function getAverageRating(Listing $listing): float
-    {
-        $average = Review::where('listing_id', $listing->id)
-            ->where('status', ReviewStatus::Approved)
-            ->avg('rating');
-
-        return $average ? round((float) $average, 1) : 0.0;
     }
 }

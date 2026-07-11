@@ -27,6 +27,7 @@ return new class extends Migration
             $table->enum('payment_status', ['pending', 'paid', 'refunded', 'failed'])->default('pending');
             $table->text('cancellation_reason')->nullable();
             $table->text('notes')->nullable();
+            $table->json('pricing_snapshot')->nullable()->comment('Persisted pricing breakdown at booking creation time');
             $table->softDeletes();
             $table->timestamps();
             

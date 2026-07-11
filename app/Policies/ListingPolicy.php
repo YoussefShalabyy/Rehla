@@ -22,17 +22,17 @@ class ListingPolicy
 
     public function create(User $user): bool
     {
-        return $user->role === UserRole::Provider;
+        return $user->role === UserRole::Admin;
     }
 
     public function update(User $user, Listing $listing): bool
     {
-        return $user->role === UserRole::Admin || $user->id === $listing->owner_id;
+        return $user->role === UserRole::Admin;
     }
 
     public function delete(User $user, Listing $listing): bool
     {
-        return $user->role === UserRole::Admin || $user->id === $listing->owner_id;
+        return $user->role === UserRole::Admin;
     }
 
     public function approve(User $user): bool

@@ -22,8 +22,8 @@ class NotificationApiTest extends TestCase
         parent::setUp();
         
         $this->customer = User::factory()->create(['role' => 'customer']);
-        $owner = User::factory()->create(['role' => 'provider']);
-        $listing = Listing::factory()->create(['owner_id' => $owner->id]);
+        $admin   = User::factory()->create(['role' => 'admin']);
+        $listing = Listing::factory()->create(['created_by' => $admin->id]);
         
         $this->booking = Booking::factory()->create([
             'customer_id' => $this->customer->id,

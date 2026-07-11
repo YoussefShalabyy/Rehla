@@ -18,98 +18,83 @@ use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
-    public function __construct(private PushNotificationInterface $push) {}
+    public function __construct(private PushNotificationInterface $push)
+    {
+    }
 
+    /**
+     * Notify customer when their booking is confirmed.
+     * (Admin-owned listings — no owner notification.)
+     */
     public function notifyBookingConfirmed(Booking $booking): void
     {
-        $booking->loadMissing(['customer', 'listing.owner']);
+        $booking->loadMissing(['customer', 'listing']);
 
-        // 1. Notify Customer (Push + Email + DB)
+        // Notify Customer (Push + Email + DB)
         $booking->customer->notify(new BookingConfirmedNotification($booking));
 
         if ($booking->customer->email) {
             Mail::to($booking->customer->email)->queue(new BookingConfirmedMail($booking));
         }
-        
-        $customerToken = $booking->customer->expo_push_token ?? 'ExponenPushToken[dummy]';
+
+        $customerToken = $booking->customer->expo_push_token ?? 'ExponentPushToken[dummy]';
         SendPushNotification::dispatch(
             $customerToken,
             'Booking Confirmed!',
             "Your booking at {$booking->listing->title} has been confirmed.",
             ['booking_uuid' => $booking->uuid]
         );
-
-        // 2. Notify Owner (Push + DB)
-        $booking->listing->owner->notify(new BookingConfirmedNotification($booking));
-
-        $ownerToken = $booking->listing->owner->expo_push_token ?? 'ExponenPushToken[dummy]';
-        SendPushNotification::dispatch(
-            $ownerToken,
-            'New Booking Confirmed!',
-            "A new booking has been confirmed for {$booking->listing->title}.",
-            ['booking_uuid' => $booking->uuid]
-        );
     }
 
+    /**
+     * Notify customer when their booking is cancelled.
+     */
     public function notifyBookingCancelled(Booking $booking): void
     {
-        $booking->loadMissing(['customer', 'listing.owner']);
+        $booking->loadMissing(['customer', 'listing']);
 
-        // 1. Notify Customer (Push + Email + DB)
+        // Notify Customer (Push + Email + DB)
         $booking->customer->notify(new BookingCancelledNotification($booking));
 
         if ($booking->customer->email) {
             Mail::to($booking->customer->email)->queue(new BookingCancelledMail($booking));
         }
 
-        $customerToken = $booking->customer->expo_push_token ?? 'ExponenPushToken[dummy]';
+        $customerToken = $booking->customer->expo_push_token ?? 'ExponentPushToken[dummy]';
         SendPushNotification::dispatch(
             $customerToken,
             'Booking Cancelled',
             "Your booking at {$booking->listing->title} has been cancelled.",
             ['booking_uuid' => $booking->uuid]
         );
-
-        // 2. Notify Owner (Push + DB)
-        $booking->listing->owner->notify(new BookingCancelledNotification($booking));
-
-        $ownerToken = $booking->listing->owner->expo_push_token ?? 'ExponenPushToken[dummy]';
-        SendPushNotification::dispatch(
-            $ownerToken,
-            'Booking Cancelled',
-            "A booking for {$booking->listing->title} has been cancelled.",
-            ['booking_uuid' => $booking->uuid]
-        );
     }
 
+    /**
+     * Notify customer when a new booking is created (pending confirmation).
+     */
     public function notifyNewBooking(Booking $booking): void
     {
-        $booking->loadMissing(['listing.owner']);
+        $booking->loadMissing(['customer', 'listing']);
 
-        // 1. Notify Owner (Push + DB)
-        $booking->listing->owner->notify(new NewBookingNotification($booking));
-
-        $ownerToken = $booking->listing->owner->expo_push_token ?? 'ExponenPushToken[dummy]';
-        SendPushNotification::dispatch(
-            $ownerToken,
-            'New Booking Request',
-            "You have received a new booking request for {$booking->listing->title}.",
-            ['booking_uuid' => $booking->uuid]
-        );
+        // Notify Customer (DB only — they initiated the booking)
+        $booking->customer->notify(new NewBookingNotification($booking));
     }
 
+    /**
+     * Notify customer about an upcoming check-in.
+     */
     public function notifyCheckInReminder(Booking $booking): void
     {
         $booking->loadMissing(['customer', 'listing']);
 
-        // 1. Notify Customer (Push + Email + DB)
+        // Notify Customer (Push + Email + DB)
         $booking->customer->notify(new CheckInReminderNotification($booking));
 
         if ($booking->customer->email) {
             Mail::to($booking->customer->email)->queue(new CheckInReminderMail($booking));
         }
 
-        $customerToken = $booking->customer->expo_push_token ?? 'ExponenPushToken[dummy]';
+        $customerToken = $booking->customer->expo_push_token ?? 'ExponentPushToken[dummy]';
         SendPushNotification::dispatch(
             $customerToken,
             'Check-in Reminder',

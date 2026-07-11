@@ -25,9 +25,7 @@ class ReviewPolicy
      */
     public function reply(User $user, Review $review): bool
     {
-        // Load the listing if not already loaded to check owner_id
-        $review->loadMissing('listing');
-        
-        return $review->listing->owner_id === $user->id;
+        // Only admins can reply to reviews
+        return $user->role === \App\Enums\UserRole::Admin;
     }
 }

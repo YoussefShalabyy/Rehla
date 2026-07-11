@@ -28,6 +28,7 @@ class Booking extends Model
             'check_out_date'     => 'date',
             'total_amount_cents' => 'integer',
             'platform_fee_cents' => 'integer',
+            'pricing_snapshot'   => 'array',
         ];
     }
 

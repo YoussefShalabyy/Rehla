@@ -23,10 +23,6 @@ class BookingPolicy
             return true; // The customer who booked it
         }
 
-        if ($booking->listing->owner_id === $user->id) {
-            return true; // The owner of the listing
-        }
-
         return false;
     }
 

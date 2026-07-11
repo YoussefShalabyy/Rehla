@@ -51,9 +51,9 @@ class BookingResource extends JsonResource
             ];
         }
 
-        // Include pricing breakdown if dynamically attached (on creation)
-        if (isset($this->pricing_breakdown)) {
-            $data['pricing_breakdown'] = $this->pricing_breakdown;
+        // Include pricing snapshot if loaded
+        if (isset($this->pricing_snapshot)) {
+            $data['pricing_snapshot'] = $this->pricing_snapshot;
         }
 
         return $data;

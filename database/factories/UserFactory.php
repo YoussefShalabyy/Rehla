@@ -50,11 +50,6 @@ class UserFactory extends Factory
         return $this->state(['role' => \App\Enums\UserRole::Customer]);
     }
 
-    public function provider(): static
-    {
-        return $this->state(['role' => \App\Enums\UserRole::Provider]);
-    }
-
     public function admin(): static
     {
         return $this->state(['role' => \App\Enums\UserRole::Admin]);

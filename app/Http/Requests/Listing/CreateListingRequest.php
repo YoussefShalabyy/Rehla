@@ -10,14 +10,14 @@ class CreateListingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->role === \App\Enums\UserRole::Provider;
+        return $this->user()?->role === \App\Enums\UserRole::Admin;
     }
 
     public function rules(): array
     {
         return [
             'type' => ['required', 'in:property,car'],
-            'property_type' => ['nullable', 'in:hotel,apartment,villa'],
+            'property_type' => ['nullable', 'in:hotel,apartment,villa,room'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'address' => ['required', 'string', 'max:255'],

@@ -18,22 +18,24 @@ class ListingFactory extends Factory
     {
         return [
             'uuid'          => (string) Str::uuid(),
-            'owner_id'      => User::factory()->create(['role' => UserRole::Provider])->id,
+            'created_by'    => User::factory()->create(['role' => UserRole::Admin])->id,
             'title'         => $this->faker->sentence(3),
             'description'   => $this->faker->paragraph(),
             'type'          => $this->faker->randomElement([ListingType::Property, ListingType::Car]),
-            'property_type' => fn(array $attributes) => $attributes['type'] === ListingType::Property ? 'apartment' : null,
+            'property_type' => fn(array $attributes) => $attributes['type'] === ListingType::Property
+                ? $this->faker->randomElement(['apartment', 'hotel', 'villa', 'room'])
+                : null,
             'address'       => $this->faker->streetAddress(),
             'country'       => 'Egypt',
             'city'          => 'Cairo',
             'latitude'      => $this->faker->latitude(),
             'longitude'     => $this->faker->longitude(),
-            'base_price_cents' => $this->faker->numberBetween(10000, 100000), // 100 - 1000 EGP
+            'base_price_cents' => $this->faker->numberBetween(10000, 100000),
             'cleaning_fee_cents' => 5000,
             'extra_guest_fee_cents' => 2000,
             'max_guests'    => $this->faker->numberBetween(1, 10),
-            'status'        => ListingStatus::Pending,
-            'is_instant_bookable' => false,
+            'status'        => ListingStatus::Published,
+            'is_instant_bookable' => true,
         ];
     }
 

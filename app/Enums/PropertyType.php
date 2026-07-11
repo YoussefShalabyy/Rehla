@@ -9,4 +9,5 @@ enum PropertyType: string
     case Hotel     = 'hotel';
     case Apartment = 'apartment';
     case Villa     = 'villa';
+    case Room      = 'room';
 }

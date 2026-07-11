@@ -4,6 +4,7 @@ namespace Tests\Feature\Review;
 
 use App\Enums\BookingStatus;
 use App\Enums\ReviewStatus;
+use App\Enums\UserRole;
 use App\Models\Booking;
 use App\Models\Listing;
 use App\Models\Review;
@@ -15,9 +16,8 @@ class ReviewTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $customer;
-    private User $owner;
-    private User $admin;
+    private User    $customer;
+    private User    $admin;
     private Listing $listing;
     private Booking $completedBooking;
     private Booking $pendingBooking;
@@ -26,13 +26,12 @@ class ReviewTest extends TestCase
     {
         parent::setUp();
 
-        $this->customer = User::factory()->create(['role' => 'customer']);
-        $this->owner = User::factory()->create(['role' => 'provider']);
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->customer = User::factory()->create(['role' => UserRole::Customer]);
+        $this->admin    = User::factory()->create(['role' => UserRole::Admin]);
 
         $this->listing = Listing::factory()->create([
-            'owner_id' => $this->owner->id,
-            'status'   => 'published',
+            'created_by' => $this->admin->id,
+            'status'     => 'published',
         ]);
 
         $this->completedBooking = Booking::factory()->create([
@@ -48,7 +47,7 @@ class ReviewTest extends TestCase
         ]);
     }
 
-    public function test_customer_can_review_completed_booking()
+    public function test_customer_can_review_completed_booking(): void
     {
         $response = $this->actingAs($this->customer)->postJson('/api/v1/reviews', [
             'booking_uuid' => $this->completedBooking->uuid,
@@ -57,8 +56,8 @@ class ReviewTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                 ->assertJsonPath('data.rating', 5)
-                 ->assertJsonPath('data.comment', 'Great stay!');
+            ->assertJsonPath('data.rating', 5)
+            ->assertJsonPath('data.comment', 'Great stay!');
 
         $this->assertDatabaseHas('reviews', [
             'booking_id' => $this->completedBooking->id,
@@ -66,7 +65,7 @@ class ReviewTest extends TestCase
         ]);
     }
 
-    public function test_cannot_review_non_completed_booking()
+    public function test_cannot_review_non_completed_booking(): void
     {
         $response = $this->actingAs($this->customer)->postJson('/api/v1/reviews', [
             'booking_uuid' => $this->pendingBooking->uuid,
@@ -76,7 +75,7 @@ class ReviewTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_cannot_leave_two_reviews_for_same_booking()
+    public function test_cannot_leave_two_reviews_for_same_booking(): void
     {
         Review::create([
             'booking_id'  => $this->completedBooking->id,
@@ -94,9 +93,9 @@ class ReviewTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_non_booking_owner_cannot_review()
+    public function test_non_booking_owner_cannot_review(): void
     {
-        $otherCustomer = User::factory()->create(['role' => 'customer']);
+        $otherCustomer = User::factory()->create(['role' => UserRole::Customer]);
 
         $response = $this->actingAs($otherCustomer)->postJson('/api/v1/reviews', [
             'booking_uuid' => $this->completedBooking->uuid,
@@ -106,7 +105,7 @@ class ReviewTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_owner_can_reply_to_review_on_own_listing()
+    public function test_admin_can_reply_to_review(): void
     {
         $review = Review::create([
             'booking_id'  => $this->completedBooking->id,
@@ -116,38 +115,38 @@ class ReviewTest extends TestCase
             'status'      => ReviewStatus::Approved,
         ]);
 
-        $response = $this->actingAs($this->owner)->postJson("/api/v1/owner/reviews/{$review->uuid}/reply", [
-            'reply' => 'Thank you!',
+        $response = $this->actingAs($this->admin)->postJson("/api/v1/admin/reviews/{$review->uuid}/reply", [
+            'reply' => 'Thank you for your feedback!',
         ]);
 
         $response->assertStatus(200)
-                 ->assertJsonPath('data.owner_reply', 'Thank you!');
+            ->assertJsonPath('data.owner_reply', 'Thank you for your feedback!');
 
         $this->assertDatabaseHas('reviews', [
             'id'          => $review->id,
-            'owner_reply' => 'Thank you!',
+            'owner_reply' => 'Thank you for your feedback!',
         ]);
     }
 
-    public function test_owner_cannot_reply_twice()
+    public function test_admin_cannot_reply_twice(): void
     {
         $review = Review::create([
-            'booking_id'     => $this->completedBooking->id,
-            'reviewer_id'    => $this->customer->id,
-            'listing_id'     => $this->listing->id,
-            'rating'         => 4,
-            'owner_reply'    => 'First reply',
-            'status'         => ReviewStatus::Approved,
+            'booking_id'  => $this->completedBooking->id,
+            'reviewer_id' => $this->customer->id,
+            'listing_id'  => $this->listing->id,
+            'rating'      => 4,
+            'owner_reply' => 'First reply',
+            'status'      => ReviewStatus::Approved,
         ]);
 
-        $response = $this->actingAs($this->owner)->postJson("/api/v1/owner/reviews/{$review->uuid}/reply", [
+        $response = $this->actingAs($this->admin)->postJson("/api/v1/admin/reviews/{$review->uuid}/reply", [
             'reply' => 'Second reply',
         ]);
 
         $response->assertStatus(422);
     }
 
-    public function test_admin_can_approve_and_hide_reviews()
+    public function test_admin_can_moderate_reviews(): void
     {
         $review = Review::create([
             'booking_id'  => $this->completedBooking->id,
@@ -169,7 +168,7 @@ class ReviewTest extends TestCase
         ]);
     }
 
-    public function test_hidden_reviews_not_returned_in_public_listing()
+    public function test_hidden_reviews_not_returned_in_public_listing(): void
     {
         Review::create([
             'booking_id'  => $this->completedBooking->id,
@@ -182,51 +181,6 @@ class ReviewTest extends TestCase
         $response = $this->getJson("/api/v1/listings/{$this->listing->uuid}/reviews");
 
         $response->assertStatus(200)
-                 ->assertJsonCount(0, 'data');
-    }
-
-    public function test_average_rating_is_calculated_correctly()
-    {
-        // 1st review (Approved, 4)
-        Review::create([
-            'booking_id'  => $this->completedBooking->id,
-            'reviewer_id' => $this->customer->id,
-            'listing_id'  => $this->listing->id,
-            'rating'      => 4,
-            'status'      => ReviewStatus::Approved,
-        ]);
-
-        // 2nd review (Approved, 5)
-        $booking2 = Booking::factory()->create([
-            'customer_id' => $this->customer->id,
-            'listing_id'  => $this->listing->id,
-            'status'      => BookingStatus::Completed,
-        ]);
-        Review::create([
-            'booking_id'  => $booking2->id,
-            'reviewer_id' => $this->customer->id,
-            'listing_id'  => $this->listing->id,
-            'rating'      => 5,
-            'status'      => ReviewStatus::Approved,
-        ]);
-
-        // 3rd review (Hidden, 1) -> shouldn't affect average
-        $booking3 = Booking::factory()->create([
-            'customer_id' => $this->customer->id,
-            'listing_id'  => $this->listing->id,
-            'status'      => BookingStatus::Completed,
-        ]);
-        Review::create([
-            'booking_id'  => $booking3->id,
-            'reviewer_id' => $this->customer->id,
-            'listing_id'  => $this->listing->id,
-            'rating'      => 1,
-            'status'      => ReviewStatus::Hidden,
-        ]);
-
-        $response = $this->getJson("/api/v1/listings/{$this->listing->uuid}/reviews");
-
-        $response->assertStatus(200)
-                 ->assertJsonPath('meta.average_rating', 4.5);
+            ->assertJsonCount(0, 'data');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\UserRole;
 use App\Models\Listing;
 use App\Models\Media;
 use App\Models\User;
@@ -10,10 +11,11 @@ class MediaPolicy
 {
     /**
      * Determine whether the user can upload media for the listing.
+     * Only admins can manage listing media.
      */
     public function upload(User $user, Listing $listing): bool
     {
-        return $user->id === $listing->owner_id;
+        return $user->role === UserRole::Admin;
     }
 
     /**
@@ -22,8 +24,7 @@ class MediaPolicy
     public function delete(User $user, Media $media): bool
     {
         if ($media->entity_type === 'listing') {
-            $listing = Listing::find($media->entity_id);
-            return $listing && $listing->owner_id === $user->id;
+            return $user->role === UserRole::Admin;
         }
 
         if ($media->entity_type === 'user') {
@@ -46,6 +47,6 @@ class MediaPolicy
      */
     public function reorder(User $user, Listing $listing): bool
     {
-        return $this->upload($user, $listing); // Same rules as upload
+        return $user->role === UserRole::Admin;
     }
 }

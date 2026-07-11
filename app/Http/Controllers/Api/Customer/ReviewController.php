@@ -76,13 +76,13 @@ class ReviewController extends Controller
         $perPage = (int) $request->input('per_page', 20);
 
         $reviews = $this->reviewService->getListingReviews($listing, $perPage);
-        $averageRating = $this->reviewService->getAverageRating($listing);
+        $listing->refresh(); // ensure average_rating is fresh from DB
 
         return response()->json([
             'success' => true,
             'data'    => ReviewResource::collection($reviews),
             'meta'    => [
-                'average_rating' => $averageRating,
+                'average_rating' => $listing->average_rating,
                 'total_reviews'  => $reviews->total(),
                 'pagination'     => [
                     'current_page' => $reviews->currentPage(),

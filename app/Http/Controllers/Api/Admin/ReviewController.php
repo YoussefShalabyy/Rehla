@@ -63,4 +63,28 @@ class ReviewController extends Controller
             'data'    => new ReviewResource($review->load('reviewer')),
         ]);
     }
+
+    /**
+     * Admin replies to a review.
+     */
+    public function reply(Request $request, string $uuid): JsonResponse
+    {
+        $request->validate([
+            'reply' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $review = Review::where('uuid', $uuid)->firstOrFail();
+
+        try {
+            $review = $this->reviewService->adminReply($review, $request->input('reply'), $request->user());
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], $e->getStatusCode());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reply added successfully.',
+            'data'    => new ReviewResource($review->load('reviewer')),
+        ]);
+    }
 }

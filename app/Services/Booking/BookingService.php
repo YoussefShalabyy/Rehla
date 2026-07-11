@@ -50,8 +50,6 @@ class BookingService
             }
 
             // 2. Check Availability inside the lock
-            // (Disabled for 'Always Open' strategy)
-            /*
             $isAvailable = $this->availabilityService->isAvailable(
                 $listing,
                 $dto->checkInDate,
@@ -61,7 +59,6 @@ class BookingService
             if (! $isAvailable) {
                 throw new BookingConflictException('The requested dates are not available.');
             }
-            */
 
             // 3. Calculate Pricing
             $pricing = $this->pricingService->calculate(
@@ -71,7 +68,7 @@ class BookingService
                 $dto->guestsCount
             );
 
-            // 4. Create Booking
+            // 4. Create Booking with persisted pricing snapshot
             $booking = Booking::create([
                 'listing_id'         => $listing->id,
                 'customer_id'        => $customer->id,
@@ -83,17 +80,15 @@ class BookingService
                 'notes'              => $dto->notes,
                 'status'             => BookingStatus::Pending,
                 'payment_status'     => \App\Enums\PaymentStatus::Pending,
+                'pricing_snapshot'   => [
+                    'nights'                => $pricing->nights,
+                    'base_total_cents'      => $pricing->baseTotalCents,
+                    'cleaning_fee_cents'    => $pricing->cleaningFeeCents,
+                    'extra_guest_fee_cents' => $pricing->extraGuestFeeCents,
+                    'platform_fee_cents'    => $pricing->platformFeeCents,
+                    'grand_total_cents'     => $pricing->grandTotalCents,
+                ],
             ]);
-
-            // Add pricing details to the booking object dynamically for the resource
-            $booking->pricing_breakdown = [
-                'nights'               => $pricing->nights,
-                'base_total_cents'     => $pricing->baseTotalCents,
-                'cleaning_fee_cents'   => $pricing->cleaningFeeCents,
-                'extra_guest_fee_cents'=> $pricing->extraGuestFeeCents,
-                'platform_fee_cents'   => $pricing->platformFeeCents,
-                'grand_total_cents'    => $pricing->grandTotalCents,
-            ];
 
             $this->notificationService->notifyNewBooking($booking);
 

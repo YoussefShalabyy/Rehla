@@ -18,37 +18,31 @@ class PricingService
     public function calculate(Listing $listing, string $checkIn, string $checkOut, int $guests): PricingResultDTO
     {
         $start = Carbon::parse($checkIn);
-        $end = Carbon::parse($checkOut);
-        
+        $end   = Carbon::parse($checkOut);
+
         $nights = (int) $start->diffInDays($end);
-        
+
         // Ensure at least 1 night
         if ($nights < 1) {
             $nights = 1;
         }
 
-        $baseTotalCents = $nights * $listing->base_price_cents;
+        $baseTotalCents   = $nights * $listing->base_price_cents;
         $cleaningFeeCents = $listing->cleaning_fee_cents ?? 0;
-        
+
         $extraGuestFeeCents = 0;
         if ($guests > $listing->max_guests) {
-            $extraGuests = $guests - $listing->max_guests;
-            // Extra guest fee is per night per extra guest
+            $extraGuests        = $guests - $listing->max_guests;
             $extraGuestFeeCents = $extraGuests * $nights * ($listing->extra_guest_fee_cents ?? 0);
         }
 
         $subtotal = $baseTotalCents + $cleaningFeeCents + $extraGuestFeeCents;
 
-        // Platform fee waived for promotion
-        $platformFeeCents = 0;
+        // Platform fee from settings (percentage of subtotal)
+        $feePercentage    = (float) PlatformSetting::get('platform_fee_percentage', 0);
+        $platformFeeCents = (int) round($subtotal * $feePercentage / 100);
 
-        // Taxes (5%)
-        $taxesCents = (int) round($subtotal * 0.05);
-
-        // Rehla VIP Discount (10% off base)
-        $discountAmountCents = (int) round($subtotal * 0.10);
-
-        $grandTotalCents = $subtotal + $taxesCents + $platformFeeCents - $discountAmountCents;
+        $grandTotalCents = $subtotal + $platformFeeCents;
 
         return new PricingResultDTO(
             nights: $nights,

@@ -32,10 +32,6 @@ class PaymentPolicy
             return true;
         }
 
-        if ($payment->booking->listing->owner_id === $user->id) {
-            return true;
-        }
-
         return false;
     }
 }

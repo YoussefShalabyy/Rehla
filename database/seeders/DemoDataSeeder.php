@@ -18,20 +18,21 @@ class DemoDataSeeder extends Seeder
             return;
         }
 
-        // Create 3 Providers
-        $providers = User::factory(3)->provider()->create();
+        // Get or create an admin to own seeded listings
+        $admin = User::where('role', UserRole::Admin->value)->first()
+            ?? User::factory()->admin()->create();
 
         // Create 10 Customers
         $customers = User::factory(10)->customer()->create();
 
-        // Create 10 Listings (mix of cars and properties)
+        // Create 10 Listings (mix of cars and properties) owned by admin
         $listings = collect();
-        foreach ($providers as $provider) {
-            $listings = $listings->merge(
-                Listing::factory(3)->published()->create(['owner_id' => $provider->id])
-            );
-        }
-        $listings->push(Listing::factory()->car()->published()->create(['owner_id' => $providers->first()->id]));
+        $listings = $listings->merge(
+            Listing::factory(5)->published()->create(['created_by' => $admin->id])
+        );
+        $listings->push(
+            Listing::factory()->car()->published()->create(['created_by' => $admin->id])
+        );
 
         // Create 20 Bookings
         $bookings = collect();

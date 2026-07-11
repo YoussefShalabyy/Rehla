@@ -15,10 +15,10 @@ class UserAdminResource extends JsonResource
             'uuid'           => $this->uuid,
             'name'           => $this->name,
             'email'          => $this->email,
+            'phone'          => $this->phone,
             'role'           => $this->role,
             'status'         => $this->status,
             'created_at'     => $this->created_at,
-            'listings_count' => $this->whenCounted('listings'),
             'bookings_count' => $this->whenCounted('bookings'),
         ];
     }

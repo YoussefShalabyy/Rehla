@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('listings', function (Blueprint $table) {
             $table->id();
             $table->char('uuid', 36)->unique();
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->enum('type', ['property', 'car']);
-            $table->enum('property_type', ['hotel', 'apartment', 'villa'])->nullable();
+            $table->enum('property_type', ['hotel', 'apartment', 'villa', 'room'])->nullable();
             $table->enum('category', ['luxury', 'sports', 'family', 'economy'])->nullable();
             $table->string('title');
             $table->text('description');
@@ -32,13 +32,15 @@ return new class extends Migration
             $table->boolean('is_instant_bookable')->default(true);
             $table->unsignedInteger('max_guests');
             $table->unsignedInteger('bedrooms')->nullable();
-            $table->unsignedInteger('bathrooms')->nullable(); // Changed from decimal to unsignedInteger based on common practice or we can use decimal(3,1)
+            $table->unsignedInteger('bathrooms')->nullable();
             $table->string('transmission')->nullable();
             $table->string('fuel_type')->nullable();
+            $table->decimal('average_rating', 3, 2)->default(0.00);
+            $table->unsignedInteger('total_reviews')->default(0);
             $table->softDeletes();
             $table->timestamps();
 
-            $table->index('owner_id');
+            $table->index('created_by');
             $table->index(['city', 'type', 'status']);
             $table->index('status');
         });

@@ -14,7 +14,7 @@ readonly class RegisterDTO
         public string $email,
         public ?string $phone,
         public string $password,
-        public UserRole $role,
+        public UserRole $role = UserRole::Customer,
     ) {}
 
     public static function fromRequest(RegisterRequest $request): self
@@ -24,7 +24,7 @@ readonly class RegisterDTO
             email: $request->validated('email'),
             phone: $request->validated('phone'),
             password: $request->validated('password'),
-            role: UserRole::from($request->validated('role')),
+            role: UserRole::Customer, // Public registration always creates customers
         );
     }
 }
