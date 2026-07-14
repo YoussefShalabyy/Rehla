@@ -26,7 +26,7 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($this->admin, 'sanctum')->getJson('/api/v1/admin/dashboard/stats');
 
         $response->assertOk()
-            ->assertJsonStructure(['data' => ['total_users', 'listings_by_status', 'bookings_by_status', 'total_revenue_cents', 'pending_approvals_count']]);
+            ->assertJsonStructure(['data' => ['total_users', 'total_bookings', 'listings_by_status', 'bookings_by_status', 'total_revenue_cents', 'gross_sales_cents']]);
     }
 
     public function test_non_admin_cannot_access_admin_routes()

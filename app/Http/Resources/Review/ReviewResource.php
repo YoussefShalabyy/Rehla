@@ -23,9 +23,14 @@ class ReviewResource extends JsonResource
             'owner_reply'    => $this->owner_reply,
             'owner_reply_at' => $this->owner_reply_at?->toISOString(),
             'reviewer'       => [
-                'name'       => $this->reviewer->name,
-                'avatar_url' => $this->reviewer->avatar_url,
+                'name'       => $this->reviewer ? $this->reviewer->name : ($this->reviewer_name ?? 'Anonymous'),
+                'avatar_url' => $this->reviewer ? $this->reviewer->avatar_url : null,
             ],
+            'status'         => $this->status,
+            'listing'        => $this->whenLoaded('listing', fn () => [
+                'uuid'  => $this->listing->uuid,
+                'title' => $this->listing->title,
+            ]),
             'created_at'     => $this->created_at->toISOString(),
         ];
     }

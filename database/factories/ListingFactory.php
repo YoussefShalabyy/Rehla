@@ -34,7 +34,7 @@ class ListingFactory extends Factory
             'cleaning_fee_cents' => 5000,
             'extra_guest_fee_cents' => 2000,
             'max_guests'    => $this->faker->numberBetween(1, 10),
-            'status'        => ListingStatus::Published,
+            'status'        => ListingStatus::Active,
             'is_instant_bookable' => true,
         ];
     }
@@ -55,18 +55,24 @@ class ListingFactory extends Factory
         ]);
     }
 
-    public function published(): static
+    public function active(): static
     {
-        return $this->state(['status' => ListingStatus::Published]);
+        return $this->state(fn (array $attributes) => [
+            'status' => ListingStatus::Active,
+        ]);
     }
 
-    public function pending(): static
+    public function hidden(): static
     {
-        return $this->state(['status' => ListingStatus::Pending]);
+        return $this->state(fn (array $attributes) => [
+            'status' => ListingStatus::Hidden,
+        ]);
     }
 
-    public function rejected(): static
+    public function disabled(): static
     {
-        return $this->state(['status' => ListingStatus::Rejected]);
+        return $this->state(fn (array $attributes) => [
+            'status' => ListingStatus::Disabled,
+        ]);
     }
 }

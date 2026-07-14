@@ -31,7 +31,7 @@ class ReviewTest extends TestCase
 
         $this->listing = Listing::factory()->create([
             'created_by' => $this->admin->id,
-            'status'     => 'published',
+            'status'     => 'active',
         ]);
 
         $this->completedBooking = Booking::factory()->create([

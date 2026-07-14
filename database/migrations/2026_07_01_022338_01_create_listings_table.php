@@ -28,7 +28,7 @@ return new class extends Migration
             $table->unsignedBigInteger('base_price_cents');
             $table->unsignedBigInteger('cleaning_fee_cents')->default(0);
             $table->unsignedBigInteger('extra_guest_fee_cents')->default(0);
-            $table->enum('status', ['pending', 'published', 'rejected', 'archived'])->default('pending');
+            $table->enum('status', ['active', 'hidden', 'disabled', 'archived'])->default('hidden');
             $table->boolean('is_instant_bookable')->default(true);
             $table->unsignedInteger('max_guests');
             $table->unsignedInteger('bedrooms')->nullable();

@@ -29,11 +29,11 @@ class UserController extends Controller
     {
         $query = User::withCount(['bookings']);
 
-        if ($request->has('role')) {
+        if ($request->filled('role')) {
             $query->where('role', $request->query('role'));
         }
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->query('status'));
         }
 

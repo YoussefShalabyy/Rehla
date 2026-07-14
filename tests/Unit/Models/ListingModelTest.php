@@ -25,7 +25,7 @@ it('scopes work correctly', function () {
     Listing::create([
         'uuid'             => (string) str()->uuid(),
         'created_by'       => $admin->id,
-        'status'           => ListingStatus::Published,
+        'status'           => ListingStatus::Active,
         'type'             => ListingType::Property,
         'city'             => 'Cairo',
         'title'            => 'Test 1',
@@ -41,7 +41,7 @@ it('scopes work correctly', function () {
     Listing::create([
         'uuid'             => (string) str()->uuid(),
         'created_by'       => $admin->id,
-        'status'           => ListingStatus::Pending,
+        'status'           => ListingStatus::Hidden,
         'type'             => ListingType::Car,
         'city'             => 'Alexandria',
         'title'            => 'Test 2',
@@ -54,7 +54,7 @@ it('scopes work correctly', function () {
         'max_guests'       => 2,
     ]);
 
-    expect(Listing::published()->count())->toBe(1)
+    expect(Listing::active()->count())->toBe(1)
         ->and(Listing::ofType(ListingType::Car)->count())->toBe(1)
         ->and(Listing::inCity('Cairo')->count())->toBe(1);
 });

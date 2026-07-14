@@ -27,7 +27,7 @@ class ListingService
     {
         $query = Listing::query()->with(['media' => fn($q) => $q->where('is_primary', true)]);
 
-        $query->where('status', ListingStatus::Published);
+        $query->where('status', ListingStatus::Active);
 
         // Location Logic: Proximity, IP Geolocation, or explicit City
         if ($dto->lat !== null && $dto->lng !== null) {
@@ -175,7 +175,7 @@ class ListingService
                 'bathrooms'              => $dto->bathrooms,
                 'transmission'           => $dto->transmission,
                 'fuel_type'              => $dto->fuelType,
-                'status'                 => ListingStatus::Published, // Admin-created listings are immediately published
+                'status'                 => ListingStatus::Active, // Admin-created listings are immediately active
                 'is_instant_bookable'    => true,
             ]);
 
@@ -223,27 +223,9 @@ class ListingService
         });
     }
 
-    public function approve(Listing $listing, User $admin): Listing
+    public function updateStatus(Listing $listing, ListingStatus $status): Listing
     {
-        if ($listing->status !== ListingStatus::Pending) {
-            throw new \App\Exceptions\InvalidListingStatusException('Only pending listings can be approved.', 400);
-        }
-
-        $listing->update(['status' => ListingStatus::Published]);
-
-        return $listing;
-    }
-
-    public function reject(Listing $listing, User $admin, string $reason): Listing
-    {
-        if ($listing->status !== ListingStatus::Pending) {
-            throw new \App\Exceptions\InvalidListingStatusException('Only pending listings can be rejected.', 400);
-        }
-
-        $listing->update(['status' => ListingStatus::Rejected]);
-
-        // Here we could optionally store the $reason in a listing_rejections table or similar
-        // For MVP, just updating status is sufficient.
+        $listing->update(['status' => $status]);
 
         return $listing;
     }
@@ -253,7 +235,7 @@ class ListingService
         $listing->delete();
     }
 
-    public function getAllForAdmin(?string $status = null, int $perPage = 20): LengthAwarePaginator
+    public function getAllForAdmin(?string $status = null, ?string $search = null, int $perPage = 20): LengthAwarePaginator
     {
         $query = Listing::query()->with(['createdBy', 'media' => fn($q) => $q->where('is_primary', true)]);
 
@@ -262,6 +244,15 @@ class ListingService
             if ($enumStatus) {
                 $query->where('status', $enumStatus);
             }
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%")
+                  ->orWhere('country', 'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%");
+            });
         }
 
         return $query->latest()->paginate($perPage);

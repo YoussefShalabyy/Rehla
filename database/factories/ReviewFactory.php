@@ -21,7 +21,7 @@ class ReviewFactory extends Factory
             'uuid'        => (string) Str::uuid(),
             'booking_id'  => Booking::factory()->completed(),
             'reviewer_id' => User::factory()->create(['role' => UserRole::Customer])->id,
-            'listing_id'  => Listing::factory()->published(),
+            'listing_id'  => Listing::factory()->active(),
             'rating'      => $this->faker->numberBetween(1, 5),
             'comment'     => $this->faker->paragraph(),
             'status'      => ReviewStatus::Approved,

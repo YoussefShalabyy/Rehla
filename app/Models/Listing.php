@@ -72,9 +72,9 @@ class Listing extends Model
         return $this->hasMany(Wishlist::class);
     }
 
-    public function scopePublished(Builder $query): Builder
+    public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', ListingStatus::Published);
+        return $query->where('status', ListingStatus::Active);
     }
 
     public function scopeOfType(Builder $query, ListingType $type): Builder

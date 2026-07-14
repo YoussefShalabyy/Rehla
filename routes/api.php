@@ -46,6 +46,11 @@ Route::prefix('listings')->group(function () {
     Route::get('/{uuid}/reviews',      [\App\Http\Controllers\Api\Customer\ReviewController::class, 'index']);
 });
 
+// ── Public Destination Routes ─────────────────────────────────────────────────
+Route::prefix('destinations')->group(function () {
+    Route::get('/suggested', [\App\Http\Controllers\Api\Customer\DestinationController::class, 'suggested']);
+});
+
 // ── Protected Routes (auth:sanctum) ──────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -72,8 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{uuid}',                        [\App\Http\Controllers\Api\Admin\ListingController::class, 'show']);
             Route::put('/{uuid}',                        [\App\Http\Controllers\Api\Admin\ListingController::class, 'update']);
             Route::delete('/{uuid}',                     [\App\Http\Controllers\Api\Admin\ListingController::class, 'destroy']);
-            Route::post('/{uuid}/approve',               [\App\Http\Controllers\Api\Admin\ListingController::class, 'approve']);
-            Route::post('/{uuid}/reject',                [\App\Http\Controllers\Api\Admin\ListingController::class, 'reject']);
+            Route::put('/{uuid}/status',                 [\App\Http\Controllers\Api\Admin\ListingController::class, 'updateStatus']);
             // Media
             Route::post('/{uuid}/media',                 [\App\Http\Controllers\Api\Admin\MediaController::class, 'upload']);
             Route::put('/{uuid}/media/reorder',          [\App\Http\Controllers\Api\Admin\MediaController::class, 'reorder']);
@@ -106,6 +110,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Admin Reviews
         Route::prefix('admin/reviews')->group(function () {
             Route::get('/',               [\App\Http\Controllers\Api\Admin\ReviewController::class, 'index']);
+            Route::post('/',              [\App\Http\Controllers\Api\Admin\ReviewController::class, 'store']);
             Route::put('/{uuid}/moderate',[\App\Http\Controllers\Api\Admin\ReviewController::class, 'moderate']);
             Route::post('/{uuid}/reply',  [\App\Http\Controllers\Api\Admin\ReviewController::class, 'reply']);
         });
@@ -114,6 +119,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('admin/settings')->group(function () {
             Route::get('/',      [\App\Http\Controllers\Api\Admin\SettingsController::class, 'index']);
             Route::put('/{key}', [\App\Http\Controllers\Api\Admin\SettingsController::class, 'update']);
+        });
+
+        // Admin Amenities
+        Route::prefix('admin/amenities')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\AmenityController::class, 'index']);
+        });
+
+        // Admin Destinations
+        Route::prefix('admin/destinations')->group(function () {
+            Route::get('/',              [\App\Http\Controllers\Api\Admin\DestinationController::class, 'index']);
+            Route::post('/',             [\App\Http\Controllers\Api\Admin\DestinationController::class, 'store']);
+            Route::put('/{uuid}',        [\App\Http\Controllers\Api\Admin\DestinationController::class, 'update']);
+            Route::delete('/{uuid}',     [\App\Http\Controllers\Api\Admin\DestinationController::class, 'destroy']);
         });
     });
 

@@ -19,16 +19,16 @@ final class LocalMediaAdapter implements MediaStorageInterface
     public function upload(UploadedFile $file, string $folder): array
     {
         $publicId = $folder . '/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $path     = $file->storeAs('public/media', $publicId);
+        $path     = $file->storeAs('media', $publicId, 'public');
 
         return [
-            'url'       => Storage::url($path),
+            'url'       => Storage::disk('public')->url($path),
             'public_id' => $publicId,
         ];
     }
 
     public function delete(string $publicId): void
     {
-        Storage::delete('public/media/' . $publicId);
+        Storage::disk('public')->delete('media/' . $publicId);
     }
 }

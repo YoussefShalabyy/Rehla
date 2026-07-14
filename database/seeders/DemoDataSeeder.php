@@ -28,10 +28,10 @@ class DemoDataSeeder extends Seeder
         // Create 10 Listings (mix of cars and properties) owned by admin
         $listings = collect();
         $listings = $listings->merge(
-            Listing::factory(5)->published()->create(['created_by' => $admin->id])
+            Listing::factory(5)->active()->create(['created_by' => $admin->id])
         );
         $listings->push(
-            Listing::factory()->car()->published()->create(['created_by' => $admin->id])
+            Listing::factory()->car()->active()->create(['created_by' => $admin->id])
         );
 
         // Create 20 Bookings

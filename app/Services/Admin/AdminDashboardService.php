@@ -15,6 +15,7 @@ class AdminDashboardService
     public function getStats(): array
     {
         $totalUsers = User::count();
+        $totalBookings = Booking::count();
         
         $listingsByStatus = Listing::toBase()
             ->selectRaw('status, count(*) as count')
@@ -33,13 +34,32 @@ class AdminDashboardService
         // Calculate total revenue from completed/confirmed bookings platform fees
         $totalRevenueCents = Booking::whereIn('status', [BookingStatus::Confirmed, BookingStatus::Completed])
             ->sum('platform_fee_cents');
+            
+        // Calculate gross sales (total_amount_cents) from completed/confirmed bookings
+        $grossSalesCents = Booking::whereIn('status', [BookingStatus::Confirmed, BookingStatus::Completed])
+            ->sum('total_amount_cents');
+
+        // Profit from Cars
+        $profitFromCarsCents = Booking::whereIn('bookings.status', [BookingStatus::Confirmed, BookingStatus::Completed])
+            ->join('listings', 'bookings.listing_id', '=', 'listings.id')
+            ->where('listings.type', 'car')
+            ->sum('bookings.platform_fee_cents');
+
+        // Profit from Properties
+        $profitFromPropertiesCents = Booking::whereIn('bookings.status', [BookingStatus::Confirmed, BookingStatus::Completed])
+            ->join('listings', 'bookings.listing_id', '=', 'listings.id')
+            ->where('listings.type', 'property')
+            ->sum('bookings.platform_fee_cents');
 
         return [
-            'total_users'             => $totalUsers,
-            'listings_by_status'      => $listingsByStatus,
-            'bookings_by_status'      => $bookingsByStatus,
-            'total_revenue_cents'     => (int) $totalRevenueCents,
-            'pending_approvals_count' => $listingsByStatus[ListingStatus::Pending->value] ?? 0,
+            'total_users'                => $totalUsers,
+            'total_bookings'             => $totalBookings,
+            'listings_by_status'         => $listingsByStatus,
+            'bookings_by_status'         => $bookingsByStatus,
+            'total_revenue_cents'        => (int) $totalRevenueCents,
+            'gross_sales_cents'          => (int) $grossSalesCents,
+            'profit_from_cars_cents'       => (int) $profitFromCarsCents,
+            'profit_from_properties_cents' => (int) $profitFromPropertiesCents,
         ];
     }
 

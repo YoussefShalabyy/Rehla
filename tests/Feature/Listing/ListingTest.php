@@ -44,11 +44,11 @@ it('admin can create a listing with status published', function () {
 
     $response->assertStatus(201)
         ->assertJsonPath('success', true)
-        ->assertJsonPath('data.status', 'published');
+        ->assertJsonPath('data.status', 'active');
 
     $this->assertDatabaseHas('listings', [
         'title'      => 'Nice Apartment',
-        'status'     => 'published',
+        'status'     => 'active',
         'created_by' => $this->admin->id,
     ]);
 });
@@ -71,61 +71,63 @@ it('unauthenticated user cannot create a listing', function () {
     $response->assertStatus(401);
 });
 
-it('admin approves a pending listing', function () {
+it('admin updates listing status', function () {
     $listing = Listing::factory()->create([
         'created_by' => $this->admin->id,
-        'status'     => ListingStatus::Pending,
+        'status'     => ListingStatus::Hidden,
     ]);
 
-    $response = $this->actingAs($this->admin)->postJson("/api/v1/admin/listings/{$listing->uuid}/approve");
+    $response = $this->actingAs($this->admin)->putJson("/api/v1/admin/listings/{$listing->uuid}/status", [
+        'status' => 'active',
+    ]);
 
     $response->assertStatus(200)
-        ->assertJsonPath('data.status', 'published');
+        ->assertJsonPath('data.status', 'active');
 
     $this->assertDatabaseHas('listings', [
         'id'     => $listing->id,
-        'status' => 'published',
+        'status' => 'active',
     ]);
 });
 
-it('admin rejects a listing with reason', function () {
+it('admin can hide a listing', function () {
     $listing = Listing::factory()->create([
         'created_by' => $this->admin->id,
-        'status'     => ListingStatus::Pending,
+        'status'     => ListingStatus::Active,
     ]);
 
-    $response = $this->actingAs($this->admin)->postJson("/api/v1/admin/listings/{$listing->uuid}/reject", [
-        'reason' => 'Photos are blurry.',
+    $response = $this->actingAs($this->admin)->putJson("/api/v1/admin/listings/{$listing->uuid}/status", [
+        'status' => 'hidden',
     ]);
 
     $response->assertStatus(200)
-        ->assertJsonPath('data.status', 'rejected');
+        ->assertJsonPath('data.status', 'hidden');
 });
 
-it('published listings appear in public search', function () {
+it('active listings appear in public search', function () {
     Listing::factory()->create([
         'created_by' => $this->admin->id,
-        'status'     => ListingStatus::Published,
-        'title'      => 'Published Listing',
+        'status'     => ListingStatus::Active,
+        'title'      => 'Active Listing',
     ]);
 
     $response = $this->getJson('/api/v1/listings');
 
     $response->assertStatus(200)
-        ->assertJsonFragment(['title' => 'Published Listing']);
+        ->assertJsonFragment(['title' => 'Active Listing']);
 });
 
-it('pending listings do not appear in public search', function () {
+it('hidden listings do not appear in public search', function () {
     Listing::factory()->create([
         'created_by' => $this->admin->id,
-        'status'     => ListingStatus::Pending,
-        'title'      => 'Pending Listing',
+        'status'     => ListingStatus::Hidden,
+        'title'      => 'Hidden Listing',
     ]);
 
     $response = $this->getJson('/api/v1/listings');
 
     $response->assertStatus(200)
-        ->assertJsonMissing(['title' => 'Pending Listing']);
+        ->assertJsonMissing(['title' => 'Hidden Listing']);
 });
 
 it('admin can update a listing', function () {
@@ -165,10 +167,10 @@ it('admin can soft-delete a listing', function () {
     $this->assertSoftDeleted('listings', ['id' => $listing->id]);
 });
 
-it('unauthenticated user can view published listing detail', function () {
+it('unauthenticated user can view active listing detail', function () {
     $listing = Listing::factory()->create([
         'created_by' => $this->admin->id,
-        'status'     => ListingStatus::Published,
+        'status'     => ListingStatus::Active,
         'title'      => 'Public View',
     ]);
 
@@ -181,13 +183,13 @@ it('unauthenticated user can view published listing detail', function () {
 it('search filters by city correctly', function () {
     Listing::factory()->create([
         'created_by' => $this->admin->id,
-        'status'     => ListingStatus::Published,
+        'status'     => ListingStatus::Active,
         'city'       => 'Alexandria',
     ]);
 
     Listing::factory()->create([
         'created_by' => $this->admin->id,
-        'status'     => ListingStatus::Published,
+        'status'     => ListingStatus::Active,
         'city'       => 'Cairo',
     ]);
 
@@ -201,7 +203,7 @@ it('search filters by city correctly', function () {
 it('search paginates results', function () {
     Listing::factory()->count(25)->create([
         'created_by' => $this->admin->id,
-        'status'     => ListingStatus::Published,
+        'status'     => ListingStatus::Active,
     ]);
 
     $response = $this->getJson('/api/v1/listings?per_page=10');

@@ -31,7 +31,7 @@ class ListingController extends Controller
     {
         $listing = $this->listingService->findByUuid($uuid);
 
-        if ($listing->status !== \App\Enums\ListingStatus::Published) {
+        if ($listing->status !== \App\Enums\ListingStatus::Active) {
             // For MVP, if it's not published, customers can't see it
             // Could throw a NotFoundException, but let's just abort
             abort(404, 'Listing not found.');

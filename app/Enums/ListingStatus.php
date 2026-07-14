@@ -6,8 +6,8 @@ namespace App\Enums;
 
 enum ListingStatus: string
 {
-    case Pending   = 'pending';
-    case Published = 'published';
-    case Rejected  = 'rejected';
-    case Archived  = 'archived';
+    case Active   = 'active';
+    case Hidden   = 'hidden';
+    case Disabled = 'disabled';
+    case Archived = 'archived';
 }

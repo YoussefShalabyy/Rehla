@@ -97,7 +97,7 @@ class HugeIntegrationSeeder extends Seeder
                     'type'                  => $tpl['type'],
                     'property_type'         => $tpl['prop_type'],
                     'category'              => $tpl['car_cat'],
-                    'status'                => ListingStatus::Published,
+                    'status'                => ListingStatus::Active,
                     'base_price_cents'      => random_int(5000, 50000),
                     'cleaning_fee_cents'    => $isCar ? 0 : 5000,
                     'extra_guest_fee_cents' => 1000,

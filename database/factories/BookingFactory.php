@@ -23,7 +23,7 @@ class BookingFactory extends Factory
             'uuid'               => (string) Str::uuid(),
             'booking_reference'  => strtoupper(Str::random(8)),
             'customer_id'        => User::factory()->create(['role' => UserRole::Customer])->id,
-            'listing_id'         => Listing::factory()->published(),
+            'listing_id'         => Listing::factory()->active(),
             'check_in_date'      => $checkIn,
             'check_out_date'     => $checkOut,
             'total_amount_cents' => $this->faker->numberBetween(50000, 500000), // 500 to 5000 EGP

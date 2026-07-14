@@ -56,6 +56,24 @@ class ReviewService
     }
 
     /**
+     * Create a new review from the Admin dashboard.
+     */
+    public function createAdminReview(Listing $listing, int $rating, ?string $comment, ?string $reviewerName): Review
+    {
+        $review = Review::create([
+            'listing_id'    => $listing->id,
+            'rating'        => $rating,
+            'comment'       => $comment,
+            'reviewer_name' => $reviewerName,
+            'status'        => ReviewStatus::Approved,
+        ]);
+
+        $this->recalculateListingRating($listing);
+
+        return $review;
+    }
+
+    /**
      * Admin replies to a review from the dashboard.
      */
     public function adminReply(Review $review, string $reply, User $admin): Review

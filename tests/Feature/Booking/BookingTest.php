@@ -34,7 +34,7 @@ class BookingTest extends TestCase
 
         $this->listing = Listing::factory()->create([
             'created_by'            => $this->admin->id,
-            'status'                => ListingStatus::Published,
+            'status'                => ListingStatus::Active,
             'base_price_cents'      => 1000,
             'cleaning_fee_cents'    => 0,
             'extra_guest_fee_cents' => 0,

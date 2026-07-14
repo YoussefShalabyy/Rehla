@@ -28,7 +28,7 @@ class ConcurrencyTest extends TestCase
 
         $listing = Listing::factory()->create([
             'created_by'       => $admin->id,
-            'status'           => ListingStatus::Published,
+            'status'           => ListingStatus::Active,
             'base_price_cents' => 1000,
         ]);
 
@@ -65,7 +65,7 @@ class ConcurrencyTest extends TestCase
 
         $listing = Listing::factory()->create([
             'created_by'       => $admin->id,
-            'status'           => ListingStatus::Published,
+            'status'           => ListingStatus::Active,
             'base_price_cents' => 1000,
         ]);
 

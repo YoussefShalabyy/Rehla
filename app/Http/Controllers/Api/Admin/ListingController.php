@@ -24,7 +24,8 @@ class ListingController extends Controller
     public function index(Request $request): JsonResponse
     {
         $status    = $request->query('status');
-        $paginator = $this->listingService->getAllForAdmin($status);
+        $search    = $request->query('search');
+        $paginator = $this->listingService->getAllForAdmin($status, $search);
 
         return $this->paginated($paginator, ListingListResource::class);
     }
@@ -61,21 +62,13 @@ class ListingController extends Controller
         return $this->success(null, 'Listing deleted successfully.');
     }
 
-    public function approve(Request $request, string $uuid): JsonResponse
+    public function updateStatus(Request $request, string $uuid): JsonResponse
     {
-        $listing = $this->listingService->findByUuid($uuid);
-        $listing = $this->listingService->approve($listing, $request->user());
-
-        return $this->success(new ListingResource($listing), 'Listing approved successfully.');
-    }
-
-    public function reject(Request $request, string $uuid): JsonResponse
-    {
-        $request->validate(['reason' => 'required|string']);
+        $request->validate(['status' => 'required|string|in:active,hidden,disabled,archived']);
 
         $listing = $this->listingService->findByUuid($uuid);
-        $listing = $this->listingService->reject($listing, $request->user(), $request->input('reason'));
+        $listing = $this->listingService->updateStatus($listing, \App\Enums\ListingStatus::from($request->input('status')));
 
-        return $this->success(new ListingResource($listing), 'Listing rejected successfully.');
+        return $this->success(new ListingResource($listing), 'Listing status updated successfully.');
     }
 }

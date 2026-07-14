@@ -8,6 +8,7 @@ use App\Enums\ReviewStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Review\ReviewResource;
 use App\Models\Review;
+use App\Models\Listing;
 use App\Services\Listing\ReviewService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,8 +24,12 @@ class ReviewController extends Controller
     {
         $query = Review::with(['reviewer', 'listing']);
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('rating')) {
+            $query->where('rating', $request->input('rating'));
         }
 
         $reviews = $query->latest()->paginate((int) $request->input('per_page', 20));
@@ -41,6 +46,34 @@ class ReviewController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Admin creates a custom review for a listing.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'listing_uuid'  => ['required', 'string', 'exists:listings,uuid'],
+            'rating'        => ['required', 'integer', 'min:1', 'max:5'],
+            'comment'       => ['nullable', 'string', 'max:1000'],
+            'reviewer_name' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $listing = Listing::where('uuid', $validated['listing_uuid'])->firstOrFail();
+
+        $review = $this->reviewService->createAdminReview(
+            $listing,
+            (int) $validated['rating'],
+            $validated['comment'] ?? null,
+            $validated['reviewer_name'] ?? null
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Review added successfully.',
+            'data'    => new ReviewResource($review->load('reviewer', 'listing')),
+        ], 201);
     }
 
     /**

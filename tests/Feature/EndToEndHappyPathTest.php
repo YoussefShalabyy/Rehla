@@ -55,7 +55,7 @@ class EndToEndHappyPathTest extends TestCase
         // Admin-created listings default to published
         $this->assertDatabaseHas('listings', [
             'uuid'   => $listingUuid,
-            'status' => ListingStatus::Published->value,
+            'status' => ListingStatus::Active->value,
         ]);
 
         // Admin uploads an image

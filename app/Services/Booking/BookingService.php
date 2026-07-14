@@ -41,7 +41,7 @@ class BookingService
                 throw new NotFoundHttpException('Listing not found.');
             }
 
-            if ($listing->status !== ListingStatus::Published) {
+            if ($listing->status !== ListingStatus::Active) {
                 throw new HttpException(422, 'Listing is not available for booking.');
             }
 
